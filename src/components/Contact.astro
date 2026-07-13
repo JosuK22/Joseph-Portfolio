@@ -1,0 +1,140 @@
+---
+// The contact form posts to Web3Forms (no backend needed for a static site).
+// 1. Get a free access key at https://web3forms.com (it emails submissions
+//    straight to josephkanoj@gmail.com — your address is never exposed).
+// 2. Paste the key below. Until then the form shows a friendly error on submit.
+const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
+---
+
+<section class="section shell" id="contact">
+  <div class="wrap">
+    <h2 class="cmd"><span class="sigil">$</span> ./contact.sh</h2>
+
+    <div class="contact-grid">
+      <div>
+        <p class="contact__intro">
+          Drop a message below, or reach me directly — I usually reply within a day.
+        </p>
+        <div class="contact__direct">
+          <p class="contact__row">
+            <span class="label">email&nbsp;&nbsp;</span>
+            <a class="contact__icon" href="mailto:josephkanoj@gmail.com" aria-label="Email me" title="Email">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </a>
+          </p>
+          <p class="contact__row">
+            <span class="label">whatsapp</span>
+            <a class="contact__icon" href="https://wa.me/919744788125" target="_blank" rel="noopener" aria-label="Message me on WhatsApp" title="WhatsApp">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.04 0C5.408 0 .029 5.375.027 11.984c0 2.096.547 4.142 1.587 5.943L0 24l6.235-1.624a12.06 12.06 0 0 0 5.804 1.482h.005c6.633 0 12.012-5.376 12.014-11.985.001-3.2-1.247-6.211-3.515-8.479A11.943 11.943 0 0 0 12.04 0zm6.987 16.916c-.27.756-1.59 1.483-2.178 1.564-.587.083-1.064.296-3.59-.748-3.052-1.244-5.013-4.353-5.166-4.552-.153-.198-1.244-1.654-1.244-3.155 0-1.502.79-2.243 1.066-2.55.275-.307.6-.385.8-.385.198 0 .397.001.571.01.184.009.43-.07.673.512.252.601.857 2.085.933 2.236.076.153.127.332.025.53-.102.198-.153.32-.302.494-.15.173-.314.387-.448.52-.15.15-.305.31-.131.61.173.298.766 1.265 1.645 2.046 1.13.998 2.083 1.31 2.385 1.46.302.15.477.13.65-.054.173-.182.74-.857.94-1.156.198-.295.4-.246.66-.148.265.1 1.675.79 1.96.934.286.15.476.222.546.346.07.124.07.715-.2 1.47z"/></svg>
+            </a>
+          </p>
+          <p class="contact__row">
+            <span class="label">github&nbsp;</span>
+            <a class="contact__icon" href="https://github.com/josephkanoj" target="_blank" rel="noopener" aria-label="GitHub profile" title="GitHub">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.755-1.333-1.755-1.089-.745.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.997.108-.776.417-1.305.76-1.605-2.665-.305-5.466-1.334-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.105 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          </p>
+          <p class="contact__row">
+            <span class="label">linkdn&nbsp;</span>
+            <a class="contact__icon" href="https://linkedin.com/in/josephkanoj" target="_blank" rel="noopener" aria-label="LinkedIn profile" title="LinkedIn">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <p class="form-panel__prompt">~/joseph $ <span class="cmd-txt">./message --new</span></p>
+        <form class="form" id="contactForm" novalidate data-key={WEB3FORMS_ACCESS_KEY}>
+          <input type="hidden" name="access_key" value={WEB3FORMS_ACCESS_KEY} />
+          <input type="hidden" name="subject" value="New message from josephk.dev" />
+          <input type="hidden" name="from_name" value="josephk.dev portfolio" />
+          <!-- honeypot -->
+          <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <div>
+            <label class="field__label" for="f-name">name:</label>
+            <input class="input" id="f-name" name="name" type="text" placeholder="Jane Recruiter" required autocomplete="name" />
+          </div>
+          <div>
+            <label class="field__label" for="f-email">email:</label>
+            <input class="input" id="f-email" name="email" type="email" placeholder="jane@company.com" required autocomplete="email" />
+          </div>
+          <div>
+            <label class="field__label" for="f-msg">message:</label>
+            <textarea class="textarea" id="f-msg" name="message" rows="4" placeholder="Tell me about the role or project..." required></textarea>
+          </div>
+          <button class="btn--send" type="submit">send ↵</button>
+          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('contactForm') as HTMLFormElement | null;
+  const status = document.getElementById('formStatus');
+  if (form && status) {
+    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const key = form.dataset.key ?? '';
+    const successSound = new Audio('/sounds/submission-success.mp3');
+    successSound.volume = 0.6;
+
+    const setStatus = (msg: string, kind: 'ok' | 'err' | '') => {
+      status.textContent = msg;
+      status.className = 'form__status' + (kind ? ' ' + kind : '');
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      if ((data.get('botcheck') as string) === 'on') return; // bot caught
+
+      const name = (data.get('name') as string)?.trim();
+      const email = (data.get('email') as string)?.trim();
+      const message = (data.get('message') as string)?.trim();
+
+      if (!name || !email || !message) {
+        setStatus('please fill in name, email, and a message.', 'err');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setStatus('that email address looks off — mind checking it?', 'err');
+        return;
+      }
+      if (!key || key === 'YOUR-WEB3FORMS-ACCESS-KEY') {
+        setStatus('form not configured yet — email josephkanoj@gmail.com directly for now.', 'err');
+        return;
+      }
+
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'sending...';
+      setStatus('', '');
+
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: data,
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+          form.reset();
+          setStatus('message sent ✓ — thanks, I’ll be in touch.', 'ok');
+          successSound.currentTime = 0;
+          successSound.play().catch(() => {});
+        } else {
+          setStatus('something went wrong sending that. try again, or email me directly.', 'err');
+        }
+      } catch {
+        setStatus('network error — check your connection and try again.', 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  }
+</script>

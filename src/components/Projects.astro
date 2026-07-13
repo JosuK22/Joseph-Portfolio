@@ -1,0 +1,77 @@
+---
+import { projects } from '../data/projects';
+import type { Project } from '../data/projects';
+
+const groups: { label: string; items: Project[] }[] = [
+  { label: '// client & freelance', items: projects.client },
+  { label: '// personal', items: projects.personal },
+];
+
+// Groups grow over time (see src/data/projects.ts) — beyond this many
+// cards, the rest collapse behind a "$ ls --all" toggle.
+const VISIBLE_LIMIT = 6;
+---
+
+<section class="section shell" id="projects">
+  <div class="wrap">
+    <h2 class="cmd"><span class="sigil">$</span> ls projects/</h2>
+
+    {
+      groups.map((group, gi) => (
+        <>
+          <p class={`proj-label${gi > 0 ? ' proj-label--gap' : ''}`}>{group.label}</p>
+          <div class="proj-grid">
+            {group.items.map((p, i) => (
+              <article class="card" data-extra={i >= VISIBLE_LIMIT ? '' : undefined}>
+                <div class="card__bar">
+                  <span class="dot dot--r" aria-hidden="true" />
+                  <span class="dot dot--y" aria-hidden="true" />
+                  <span class="dot dot--g" aria-hidden="true" />
+                  <span class="card__file">{p.file}</span>
+                </div>
+                <div class="card__body">
+                  <h3 class="card__name">{p.name}</h3>
+                  <p class="card__desc">{p.desc}</p>
+                  <div class="card__tags">
+                    {p.tags.map((t) => (
+                      <span class="tag">{t}</span>
+                    ))}
+                  </div>
+                  <div class="card__links">
+                    {p.live && (
+                      <a class="card__link" href={p.live} target="_blank" rel="noopener">
+                        live <span class="arrow">↗</span>
+                      </a>
+                    )}
+                    {p.repo && (
+                      <a class="card__link" href={p.repo} target="_blank" rel="noopener">
+                        GitHub <span class="arrow">↗</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          {group.items.length > VISIBLE_LIMIT && (
+            <button class="proj-more" type="button" data-proj-more aria-expanded="false">
+              $ ls --all <span class="proj-more__count">(+{group.items.length - VISIBLE_LIMIT} more)</span>
+            </button>
+          )}
+        </>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  // "$ ls --all" reveals the collapsed cards of its own group, then removes
+  // itself — everything stays visible from there on.
+  document.querySelectorAll<HTMLButtonElement>('[data-proj-more]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btn.previousElementSibling?.classList.add('proj-grid--all');
+      btn.setAttribute('aria-expanded', 'true');
+      btn.remove();
+    });
+  });
+</script>

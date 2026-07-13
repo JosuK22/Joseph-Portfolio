@@ -1,0 +1,25 @@
+---
+import { jobs } from '../data/experience';
+---
+
+<section class="section shell" id="experience">
+  <div class="wrap">
+    <h2 class="cmd"><span class="sigil">$</span> cat experience.log</h2>
+    <div class="jobs">
+      {
+        jobs.map((job) => (
+          <article class="job">
+            <div class="job__head">
+              <h3 class="job__role">{job.role}</h3>
+              <span class="job__dates">{job.dates}</span>
+            </div>
+            <p class="job__company">{job.company}</p>
+            <ul class="job__bullets">
+              {job.bullets.map((b) => <li class="job__bullet">{b}</li>)}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

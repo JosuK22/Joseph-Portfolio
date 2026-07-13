@@ -1,0 +1,95 @@
+---
+const links = [
+  { href: '#about', label: 'about' },
+  { href: '#skills', label: 'skills' },
+  { href: '#experience', label: 'experience' },
+  { href: '#projects', label: 'projects' },
+  { href: '#contact', label: 'contact' },
+];
+---
+
+<header>
+  <nav class="nav shell" aria-label="Primary">
+    <a href="#top" class="nav__logo">~/joseph</a>
+
+    <div class="nav__links">
+      {links.map((l) => <a class="nav__link" href={l.href}>{l.label}</a>)}
+      <span class="nav__sep" aria-hidden="true">·</span>
+      <span class="nav__icons">
+        <a class="nav__icon" href="mailto:josephkanoj@gmail.com" aria-label="Email">✉</a>
+      </span>
+    </div>
+
+    <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMobile" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav__progress" id="navProgress" aria-hidden="true"></div>
+  </nav>
+
+  <div class="nav__mobile shell" id="navMobile">
+    {links.map((l) => <a href={l.href} data-close>{l.label}</a>)}
+    <a href="mailto:josephkanoj@gmail.com" data-close>email</a>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('navToggle');
+  const menu = document.getElementById('navMobile');
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const open = menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    menu.querySelectorAll('[data-close]').forEach((a) =>
+      a.addEventListener('click', () => {
+        menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      })
+    );
+  }
+
+  // Scroll progress bar — a thin phosphor line under the nav that fills as
+  // you read down the page.
+  const bar = document.getElementById('navProgress');
+  if (bar) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      bar.style.width = max > 0 ? `${(doc.scrollTop / max) * 100}%` : '0%';
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
+    update();
+  }
+
+  // Scrollspy — highlight the nav link of the section currently in view.
+  const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav__link'));
+  const byId = new Map(navLinks.map((l) => [l.hash.slice(1), l]));
+  const sections = Array.from(byId.keys())
+    .map((id) => document.getElementById(id))
+    .filter((s): s is HTMLElement => s !== null);
+  const spy = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        navLinks.forEach((l) => l.classList.remove('active'));
+        byId.get(entry.target.id)?.classList.add('active');
+      }
+    },
+    // A narrow horizontal band around the reader's eyeline decides which
+    // section is "current" — avoids two sections lighting up at once.
+    { rootMargin: '-35% 0px -60% 0px' }
+  );
+  sections.forEach((s) => spy.observe(s));
+</script>

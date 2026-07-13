@@ -1,0 +1,144 @@
+---
+// Hero — opens with the most characteristic thing in the subject's world:
+// a terminal prompt resolving to the name.
+---
+
+<section class="hero shell" id="top">
+  <div class="wrap hero__grid">
+    <div class="hero__content">
+      <p class="hero__boot">
+        [ booting phosphor-term v2.6 ...<span class="ok"> ok</span> ]&nbsp;&nbsp;loading
+        /home/joseph/portfolio ...<span class="ok"> ok</span>
+      </p>
+
+      <p class="hero__prompt hero__stage" style="--stage: 0">~/joseph $ <span class="cmd-txt">who am i</span></p>
+
+      <h1 class="hero__name hero__stage" style="--stage: 1">Joseph&nbsp;K&nbsp;Anoj</h1>
+
+      <p class="hero__subtitle hero__stage" style="--stage: 2">Full Stack Developer · Frontend Specialist</p>
+
+      <!-- <p class="hero__tagline hero__stage" style="--stage: 3">
+        I build fast, accessible, responsive interfaces in React and Astro.<span class="cursor" aria-hidden="true"></span>
+      </p> -->
+
+      <p class="hero__meta hero__stage" style="--stage: 4">// based in India · open to remote &amp; relocation</p>
+
+      <div class="hero__actions hero__stage" style="--stage: 5">
+        <a class="btn btn--solid" href="#projects">View projects →</a>
+        <a class="btn btn--outline" href="/resume.pdf" download>Download resume</a>
+      </div>
+    </div>
+
+    <div class="hero__art hero__stage" style="--stage: 6" aria-hidden="true">
+      <canvas class="particles" id="heroParticles"></canvas>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { mountHeroParticles } from '../scripts/hero-particles';
+
+  const canvas = document.getElementById('heroParticles');
+  if (canvas instanceof HTMLCanvasElement) {
+    let mounted = false;
+    const start = () => {
+      if (mounted) return;
+      mounted = true;
+      mountHeroParticles(canvas, '/images/joseph-retro-clean.png');
+    };
+
+    // During the boot sequence the portrait is hidden (opacity 0), and the
+    // engine plays its scatter-in intro exactly once, on mount — so wait
+    // for the art's cascade animation to begin before mounting, or the
+    // assembly would play out invisibly behind the typing. Without a boot
+    // sequence (reduced motion), mount right away.
+    const art = canvas.closest('.hero__art');
+    if (document.documentElement.classList.contains('booting') && art) {
+      art.addEventListener('animationstart', (e) => {
+        if (e instanceof AnimationEvent && e.animationName === 'boot-rise') start();
+      });
+      setTimeout(start, 8000); // failsafe — never leave the canvas empty
+    } else {
+      start();
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Boot sequence: type the boot line character by character, then flip
+  // <html> from .booting to .booted — CSS takes it from there, cascading
+  // the hero elements (and finally the nav) into view one by one.
+  //
+  // Only runs when the inline head script added .booting (i.e. JS is on
+  // and the visitor doesn't prefer reduced motion). Scrolling is locked
+  // (html.booting { overflow: hidden }) until the boot completes; a key
+  // press or click skips straight to the end, which also unlocks it. Once
+  // the line has typed out it fades and is removed from the layout — safe,
+  // because every other element is still hidden at that point. The static
+  // markup in .hero__boot is the no-JS / reduced-motion fallback (kept, as
+  // flavor, in those modes); SEGMENTS below is what actually gets typed
+  // and must be kept in sync with it.
+  // ---------------------------------------------------------------------
+  const root = document.documentElement;
+  const boot = document.querySelector('.hero__boot');
+
+  if (root.classList.contains('booting') && boot instanceof HTMLElement) {
+    const SEGMENTS: { t: string; ok?: boolean; pause?: number }[] = [
+      { t: '[ booting phosphor-term v2.6 ...' },
+      { t: ' ok', ok: true, pause: 320 },
+      { t: ' ]  loading /home/joseph/portfolio ...', pause: 200 },
+      { t: ' ok', ok: true, pause: 320 },
+    ];
+
+    // Browsers restore the previous scroll position on reload; the boot
+    // plays at the top with scrolling locked, so start there.
+    window.scrollTo(0, 0);
+
+    let skip = false;
+    const skipNow = () => {
+      skip = true;
+    };
+    window.addEventListener('keydown', skipNow, { once: true });
+    window.addEventListener('pointerdown', skipNow, { once: true });
+
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor cursor--sm';
+    cursor.setAttribute('aria-hidden', 'true');
+    boot.textContent = '';
+    boot.appendChild(cursor);
+    boot.style.visibility = 'visible';
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    (async () => {
+      for (const seg of SEGMENTS) {
+        if (seg.pause && !skip) await sleep(seg.pause);
+        const node = document.createTextNode('');
+        if (seg.ok) {
+          const span = document.createElement('span');
+          span.className = 'ok';
+          span.appendChild(node);
+          boot.insertBefore(span, cursor);
+        } else {
+          boot.insertBefore(node, cursor);
+        }
+        for (const ch of seg.t) {
+          node.data += ch;
+          if (!skip) await sleep(12 + Math.random() * 16);
+        }
+      }
+      if (!skip) await sleep(380);
+      // Fade the boot line out and drop it from the layout. Everything else
+      // is still hidden, so the hero re-flowing one line up is invisible —
+      // the cascade then starts from a clean prompt.
+      if (!skip) {
+        boot.style.transition = 'opacity 0.25s ease';
+        boot.style.opacity = '0';
+        await sleep(270);
+      }
+      boot.style.display = 'none';
+      cursor.remove();
+      root.classList.remove('booting');
+      root.classList.add('booted');
+    })();
+  }
+</script>

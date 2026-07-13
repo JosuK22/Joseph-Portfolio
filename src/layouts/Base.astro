@@ -1,0 +1,145 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Joseph K Anoj — Full Stack Developer · Frontend Specialist',
+  description = 'Full Stack Developer and Frontend Specialist building fast, accessible, responsive interfaces in React and Astro. Open to remote work and relocation.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://josephk.dev/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content="https://josephk.dev/" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{title}</title>
+
+    <!-- Boot-sequence flag. Runs before first paint so the intro never
+         flashes; skipped entirely under prefers-reduced-motion, and a
+         failsafe reveals the page even if the typing script never runs. -->
+    <script is:inline>
+      (function () {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var root = document.documentElement;
+        root.classList.add('booting');
+        setTimeout(function () {
+          if (root.classList.contains('booting')) {
+            root.classList.remove('booting');
+            root.classList.add('booted');
+          }
+        }, 5000);
+      })();
+    </script>
+  </head>
+  <body>
+    <!--
+      ╔══════════════════════════════════════════════════╗
+      ║  reading the source, are we? three games hide     ║
+      ║  on this page. three riddles:                     ║
+      ║   · it grows as it eats — type its name           ║
+      ║   · the project lights rehearse their secret      ║
+      ║   · the code that gave 30 lives still works       ║
+      ╚══════════════════════════════════════════════════╝
+    -->
+    <a class="skip-link" href="#about">Skip to content</a>
+    <div class="scanlines" aria-hidden="true"></div>
+    <slot />
+
+    <script>
+      const CLICKABLE_SELECTOR = "a, button, [role='button'], input[type='submit'], input[type='button'], label[for]";
+
+      function createPool(src: string, size: number, volume: number) {
+        return Array.from({ length: size }, () => {
+          const audio = new Audio(src);
+          audio.volume = volume;
+          audio.preload = 'auto';
+          return audio;
+        });
+      }
+
+      function playFromPool(pool: HTMLAudioElement[], index: { i: number }) {
+        const audio = pool[index.i];
+        index.i = (index.i + 1) % pool.length;
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+
+      const clickPool = createPool('/sounds/menu-click.mp3', 4, 0.5);
+      const clickIndex = { i: 0 };
+
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        const match = target.closest(CLICKABLE_SELECTOR) as (HTMLElement & { disabled?: boolean }) | null;
+        if (!match || match.disabled) return;
+        playFromPool(clickPool, clickIndex);
+      });
+
+      const hoverPool = createPool('/sounds/menu-hover.mp3', 3, 0.35);
+      const hoverIndex = { i: 0 };
+
+      document.querySelectorAll(CLICKABLE_SELECTOR).forEach((el) => {
+        el.addEventListener('pointerenter', (e) => {
+          if (!(e instanceof PointerEvent) || e.pointerType !== 'mouse') return;
+          if ((el as HTMLElement & { disabled?: boolean }).disabled) return;
+          playFromPool(hoverPool, hoverIndex);
+        });
+      });
+    </script>
+
+    <script>
+      import { initSecrets } from '../scripts/secrets';
+      initSecrets();
+
+      // Reveal-on-scroll: sections below the fold fade up as they enter the
+      // viewport. Elements already visible on load are never hidden (no
+      // flash), and the whole thing is skipped under prefers-reduced-motion
+      // — the class is only ever added by JS, so no-JS visitors see
+      // everything as normal too.
+      if (
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+        'IntersectionObserver' in window
+      ) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('reveal--in');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.06 }
+        );
+        document.querySelectorAll('.section .wrap').forEach((el) => {
+          if (el.getBoundingClientRect().top < window.innerHeight * 0.94) return;
+          el.classList.add('reveal');
+          io.observe(el);
+        });
+      }
+    </script>
+  </body>
+</html>

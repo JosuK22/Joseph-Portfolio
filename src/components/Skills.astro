@@ -1,0 +1,21 @@
+---
+import { skills } from '../data/skills';
+---
+
+<section class="section shell" id="skills">
+  <div class="wrap">
+    <h2 class="cmd"><span class="sigil">$</span> ls skills/</h2>
+    <div class="skills">
+      {
+        skills.map((grp) => (
+          <div class="skill-group">
+            <div class="skill-group__label">{grp.label}/</div>
+            <div class="skill-group__chips">
+              {grp.items.map((item) => <span class="chip">{item}</span>)}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
