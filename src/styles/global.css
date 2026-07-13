@@ -105,7 +105,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--border-lit) var(--bg); }
 .shell { padding-inline: var(--pad-x); }
 
 .section {
-  padding: 46px 0;
+  padding-block: 46px; /* block only — .shell owns the inline gutters */
   border-top: 1px solid var(--border);
   scroll-margin-top: calc(var(--nav-h) + 12px);
 }
@@ -265,7 +265,18 @@ header { position: relative; }
 /* ============================================================
    HERO
    ============================================================ */
-.hero { padding: 78px 0 70px; }
+.hero {
+  padding-block: 78px 70px; /* block only — .shell owns the inline gutters */
+  /* fill the first screen: the nav above is sticky and var(--nav-h) tall, so
+     hero + nav together cover the viewport and the next section starts below
+     the fold — nothing peeks through during the boot sequence on tall
+     displays. svh (where supported) ignores mobile browser chrome. */
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100svh - var(--nav-h));
+  display: flex;
+  align-items: center;
+}
+.hero__grid { width: 100%; }
 
 /* ---------- boot sequence (typed intro — see Hero.astro) ----------
    html.booting is set by an inline head script before first paint (never
@@ -274,6 +285,11 @@ header { position: relative; }
    staged hero elements cascade in, followed by the nav. */
 html.booting { overflow: hidden; } /* no scrolling until the boot completes */
 html.booting .nav { opacity: 0; pointer-events: none; }
+/* belt and braces: even if the hero somehow ends up shorter than the
+   viewport (unusual zoom levels, tiny landscape screens), the sections
+   after it stay invisible until the boot hands over to the cascade */
+html.booting .hero ~ *,
+html.booting footer { visibility: hidden; }
 html.booting .hero__boot { visibility: hidden; }
 html.booting .hero__stage { opacity: 0; }
 html.booted .hero__stage {
@@ -821,30 +837,34 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 /* ============================================================
-   RESPONSIVE  (tablet band 721–1024px)
+   RESPONSIVE  (tablet band 721–1099px — matches the hero's
+   1100px side-by-side switch so grids never get squeezed)
    ============================================================ */
-@media (max-width: 1024px) and (min-width: 721px) {
+@media (max-width: 1099px) and (min-width: 721px) {
   .proj-grid { grid-template-columns: repeat(2, 1fr); }
   .contact-grid { grid-template-columns: 1fr; gap: 30px; }
   .skill-group { grid-template-columns: 150px 1fr; }
+}
+
+/* the five text links don't fit comfortably below ~880px — hand
+   over to the hamburger earlier than the full mobile layout */
+@media (max-width: 880px) {
+  .nav__links { display: none; }
+  .nav__toggle { display: block; }
 }
 
 /* ============================================================
    RESPONSIVE  (desktop ↔ mobile switch ~720px)
    ============================================================ */
 @media (max-width: 720px) {
-  :root { --pad-x: 24px; }
+  :root { --pad-x: 20px; }
 
-  body { padding-inline: 20px; }
-
-  .nav__links { display: none; }
-  .nav__toggle { display: block; }
-
-  .section { padding: 30px 0; }
+  .section { padding-block: 30px; }
   .cmd { font-size: 28px; }
 
-  .hero { padding: 36px 0 34px; }
+  .hero { padding-block: 36px 34px; }
   .hero__boot { margin-bottom: 22px; font-size: 12px; }
+  .hero__name { font-size: clamp(40px, 13vw, 64px); overflow-wrap: anywhere; }
   .hero__subtitle { font-size: 24px; }
   .hero__tagline { font-size: 15px; }
   .hero__actions { gap: 10px; }
@@ -879,6 +899,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      flips mid-session make sure nothing stays hidden or animates */
   html.booting .nav, html.booting .hero__stage { opacity: 1; }
   html.booting .hero__boot { visibility: visible; }
+  html.booting .hero ~ *, html.booting footer { visibility: visible; }
   html.booted .hero__stage, html.booted .nav { animation: none; }
   *, *::before, *::after { transition: none !important; }
   .btn:hover, .nav__icon:hover,
