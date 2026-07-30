@@ -1,9 +1,10 @@
 ---
-// The contact form posts to Web3Forms (no backend needed for a static site).
-// 1. Get a free access key at https://web3forms.com (it emails submissions
-//    straight to josephkanoj@gmail.com — your address is never exposed).
-// 2. Paste the key below. Until then the form shows a friendly error on submit.
-const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
+// The contact form sends mail via EmailJS (no backend needed for a static site),
+// same setup as the old portfolio — EmailJS relays the submission to
+// josephkanoj@gmail.com without exposing the address in this code.
+const EMAILJS_SERVICE_ID = 'service_9t1jati';
+const EMAILJS_TEMPLATE_ID = 'template_lspheld';
+const EMAILJS_PUBLIC_KEY = 'vgl13mOPDDcS2GizB';
 ---
 
 <section class="section shell" id="contact">
@@ -45,10 +46,14 @@ const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
 
       <div class="form-panel">
         <p class="form-panel__prompt">~/joseph $ <span class="cmd-txt">./message --new</span></p>
-        <form class="form" id="contactForm" novalidate data-key={WEB3FORMS_ACCESS_KEY}>
-          <input type="hidden" name="access_key" value={WEB3FORMS_ACCESS_KEY} />
-          <input type="hidden" name="subject" value="New message from josephk.dev" />
-          <input type="hidden" name="from_name" value="josephk.dev portfolio" />
+        <form
+          class="form"
+          id="contactForm"
+          novalidate
+          data-service-id={EMAILJS_SERVICE_ID}
+          data-template-id={EMAILJS_TEMPLATE_ID}
+          data-public-key={EMAILJS_PUBLIC_KEY}
+        >
           <!-- honeypot -->
           <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
@@ -73,11 +78,13 @@ const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
 </section>
 
 <script>
+  import emailjs from '@emailjs/browser';
+
   const form = document.getElementById('contactForm') as HTMLFormElement | null;
   const status = document.getElementById('formStatus');
   if (form && status) {
     const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-    const key = form.dataset.key ?? '';
+    const { serviceId, templateId, publicKey } = form.dataset;
     const successSound = new Audio('/sounds/submission-success.mp3');
     successSound.volume = 0.6;
 
@@ -104,7 +111,7 @@ const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
         setStatus('that email address looks off — mind checking it?', 'err');
         return;
       }
-      if (!key || key === 'YOUR-WEB3FORMS-ACCESS-KEY') {
+      if (!serviceId || !templateId || !publicKey) {
         setStatus('form not configured yet — email josephkanoj@gmail.com directly for now.', 'err');
         return;
       }
@@ -115,22 +122,13 @@ const WEB3FORMS_ACCESS_KEY = 'YOUR-WEB3FORMS-ACCESS-KEY';
       setStatus('', '');
 
       try {
-        const res = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { Accept: 'application/json' },
-          body: data,
-        });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          form.reset();
-          setStatus('message sent ✓ — thanks, I’ll be in touch.', 'ok');
-          successSound.currentTime = 0;
-          successSound.play().catch(() => {});
-        } else {
-          setStatus('something went wrong sending that. try again, or email me directly.', 'err');
-        }
+        await emailjs.sendForm(serviceId, templateId, form, publicKey);
+        form.reset();
+        setStatus('message sent ✓ — thanks, I’ll be in touch.', 'ok');
+        successSound.currentTime = 0;
+        successSound.play().catch(() => {});
       } catch {
-        setStatus('network error — check your connection and try again.', 'err');
+        setStatus('something went wrong sending that. try again, or email me directly.', 'err');
       } finally {
         btn.disabled = false;
         btn.textContent = original;
