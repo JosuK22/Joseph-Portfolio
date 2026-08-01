@@ -13,3 +13,5 @@ yarn-error.log*
 .env.production
 # macOS
 .DS_Store
+# temporary files
+temp/

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <title>Joseph K Anoj — Frontend Developer</title>
+    <style>
+      /* ==========================================================
+         Print-first, parser-first resume.
+
+         Targeting: Europe/UK roles (A4, British spelling), remote or
+         relocation. Single column, no tables, no images, no text boxes,
+         no header/footer regions.
+
+         Deliberate ATS constraints — each of these breaks a real parser
+         if violated, so do not "improve" them back:
+
+         1. NO letter-spacing on headings. Tracked-out capitals are the
+            classic cause of "S U M M A R Y" in extracted text.
+         2. NO CSS generated content (::before/::after) for separators.
+            It renders as glyphs but is invisible in the DOM and lands in
+            unpredictable places in the content stream. Separators are
+            literal characters in the markup instead.
+         3. NO text-align: justify. Variable word spacing makes extractors
+            insert or drop spaces mid-line.
+         4. NO grid/multi-column for content. The skills block is plain
+            block flow with real "Label: value" text, which parsers read
+            as key/value pairs.
+         5. ASCII separators (| and -) rather than typographic glyphs in
+            structural positions, so nothing depends on the CMap resolving
+            an en dash or a middot correctly.
+
+         The single title/date flex row is kept: DOM order matches visual
+         order, and it is standard in every ATS-friendly template.
+         ========================================================== */
+
+      :root {
+        --ink: #14181c;
+        --body: #2c3339;
+        --muted: #5d686f;
+        --accent: #14603a;
+        --rule: #d3dad6;
+      }
+
+      @page {
+        size: A4;
+        margin: 11mm 13mm;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+        font-size: 9.1pt;
+        line-height: 1.25;
+        color: var(--body);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* ---------- header ---------- */
+      header {
+        border-bottom: 1.5pt solid var(--accent);
+        padding-bottom: 4pt;
+        margin-bottom: 6pt;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 20pt;
+        line-height: 1.05;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .title {
+        margin: 2.5pt 0 0;
+        font-size: 10.5pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .contact {
+        margin: 4pt 0 0;
+        font-size: 8.6pt;
+        color: var(--muted);
+      }
+
+      /* ---------- sections ---------- */
+      section {
+        margin-bottom: 4pt;
+      }
+
+      h2 {
+        margin: 0 0 3.5pt;
+        font-size: 9pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--accent);
+        border-bottom: 0.6pt solid var(--rule);
+        padding-bottom: 2pt;
+      }
+
+      .summary {
+        margin: 0;
+      }
+
+      /* ---------- experience ---------- */
+      .role {
+        margin-bottom: 3.5pt;
+        break-inside: avoid;
+      }
+
+      .role:last-child {
+        margin-bottom: 0;
+      }
+
+      .role__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10pt;
+      }
+
+      .role__title {
+        margin: 0;
+        font-size: 10.2pt;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .role__dates {
+        flex: none;
+        font-size: 8.6pt;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .role__org {
+        margin: 0.5pt 0 3pt;
+        font-size: 9.4pt;
+        font-style: italic;
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 12pt;
+      }
+
+      li {
+        margin-bottom: 0.8pt;
+      }
+
+      li::marker {
+        color: var(--accent);
+      }
+
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* ---------- projects ---------- */
+      .project {
+        margin-bottom: 4pt;
+        break-inside: avoid;
+      }
+
+      .project:last-child {
+        margin-bottom: 0;
+      }
+
+      .project__name {
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .project__stack {
+        font-size: 8.4pt;
+        color: var(--muted);
+      }
+
+      /* ---------- skills (plain block flow, "Label: value") ---------- */
+      .skill {
+        margin: 0 0 1.6pt;
+      }
+
+      .skill:last-child {
+        margin-bottom: 0;
+      }
+
+      .skill b {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* ---------- education ---------- */
+      .edu__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10pt;
+      }
+
+      .edu__degree {
+        margin: 0;
+        font-size: 10pt;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .edu__org {
+        margin: 0.5pt 0 0;
+        font-size: 9.4pt;
+        font-style: italic;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Joseph K Anoj</h1>
+      <p class="title">Frontend Developer</p>
+      <p class="contact">
+        josephkanoj@gmail.com | +91 97447 88125 | India | Open to relocation &amp; remote
+      </p>
+      <p class="contact">
+        josephk.dev | github.com/JosuK22 | linkedin.com/in/josephkanoj
+      </p>
+    </header>
+
+    <section>
+      <h2>Summary</h2>
+      <p class="summary">
+        Frontend Developer with 3+ years building production web interfaces in React, Next.js and
+        Astro, working remote-first with distributed teams throughout. Currently ship the frontend
+        across a multi-brand startup studio on a shared component library and CI/CD pipeline.
+        Strong on translating Figma into accessible, responsive, maintainable UI, integrating REST
+        APIs, and carrying interactive work (3D, animation, real-time dashboards) from prototype to
+        production. Also comfortable across the MERN stack from internship and freelance work.
+      </p>
+    </section>
+
+    <section>
+      <h2>Experience</h2>
+
+      <article class="role">
+        <div class="role__head">
+          <h3 class="role__title">Frontend Developer</h3>
+          <span class="role__dates">Jul 2025 - Present</span>
+        </div>
+        <p class="role__org">BeyondZ / Venture Way - Remote</p>
+        <ul>
+          <li>
+            Delivered <strong>8+ production marketing and corporate sites</strong> for a multi-brand
+            startup studio, including VentureFactory.AI, BeyondZ, World Startup Federation and the
+            GETAI Foundation, on a shared component library, design-token system and GitHub Actions
+            pipeline that keep a large multi-site UI consistent and maintainable.
+          </li>
+          <li>
+            Built the frontend of an in-house <strong>headless CMS platform</strong>: a React/MUI
+            admin console for content management and submissions review, plus typed API clients with
+            retry/backoff that consume the CMS REST API from production client sites.
+          </li>
+          <li>
+            Built the frontend of a <strong>Next.js corporate site</strong>, including a
+            password-gated admin dashboard for blog and case-study content with rich-text editing and
+            image upload, integrated against a Supabase backend.
+          </li>
+          <li>
+            Implemented advanced interactive features, including a <strong>Three.js /
+            react-three-fiber 3D globe hero</strong>, an AI-persona chat UI and animated
+            neural-network hero graphics, with Playwright coverage and Azure Static Web Apps CI/CD
+            across dev and production.
+          </li>
+        </ul>
+      </article>
+
+      <article class="role">
+        <div class="role__head">
+          <h3 class="role__title">Freelance Frontend Developer</h3>
+          <span class="role__dates">Oct 2024 - Jul 2025</span>
+        </div>
+        <p class="role__org">Self-employed - Remote</p>
+        <ul>
+          <li>
+            Built a full-stack management application that raised a client's operational
+            productivity by an estimated <strong>15-25%</strong>.
+          </li>
+          <li>
+            Designed and built a real-time <strong>IoT dashboard UI in React</strong>, focused on
+            usability and live interactivity.
+          </li>
+          <li>
+            Delivered complete product UI/UX from scratch against accessibility and design-system
+            guidelines, and shipped a fully responsive startup marketing site in Wix Studio with
+            customised CSS.
+          </li>
+        </ul>
+      </article>
+
+      <article class="role">
+        <div class="role__head">
+          <h3 class="role__title">Full Stack Developer Intern</h3>
+          <span class="role__dates">Jan 2024 - Jul 2024</span>
+        </div>
+        <p class="role__org">Cuvette Tech - Remote</p>
+        <ul>
+          <li>
+            Built <strong>Quizzie</strong>, a MERN-stack quiz builder with a responsive interface
+            implemented from Figma designs.
+          </li>
+          <li>
+            Built <strong>Task Manager</strong>, a full application with JWT authentication, CRUD
+            operations and secured REST API endpoints.
+          </li>
+        </ul>
+      </article>
+
+      <article class="role">
+        <div class="role__head">
+          <h3 class="role__title">Associate Developer L1</h3>
+          <span class="role__dates">Feb 2022 - Dec 2022</span>
+        </div>
+        <p class="role__org">Publicis Sapient - Bangalore, India</p>
+        <ul>
+          <li>
+            Developed frontend features for a <strong>high-traffic eCommerce platform</strong> on
+            Salesforce Commerce Cloud (SFCC).
+          </li>
+          <li>
+            Led frontend development for a hotel-management system covering booking, room
+            availability and backend authentication, working in Agile teams and running code reviews
+            to uphold web-performance standards across releases.
+          </li>
+        </ul>
+      </article>
+    </section>
+
+    <section>
+      <!-- Deliberately excludes the studio work: it is already described, in
+           more relevant detail, under Experience. This section exists to show
+           independent React/MERN initiative outside of employment. -->
+      <h2>Projects</h2>
+
+      <p class="project">
+        <span class="project__name">Workflow Builder</span> - Dynamic flowchart builder with
+        drag-and-drop nodes, Context API state management, and workflows persisted to local storage.
+        <span class="project__stack">React, React Flow, Context API</span>
+      </p>
+
+      <p class="project">
+        <span class="project__name">Versa Hub</span> - Multi-feature web app combining notes,
+        weather forecasts, movie recommendations and news by integrating several public APIs behind
+        one interface.
+        <span class="project__stack">React, Vite, REST APIs</span>
+      </p>
+
+      <p class="project">
+        <span class="project__name">Portfolio (josephk.dev)</span> - Zero-framework-JS Astro build
+        with a canvas particle-portrait hero, a working in-page shell, and full reduced-motion and
+        keyboard-accessibility support.
+        <span class="project__stack">Astro, TypeScript, Canvas</span>
+      </p>
+    </section>
+
+    <section>
+      <h2>Technical Skills</h2>
+      <p class="skill">
+        <b>Languages:</b> TypeScript, JavaScript (ES6+), Java, Python, SQL, HTML5, CSS3
+      </p>
+      <p class="skill">
+        <b>Frontend:</b> React.js, Next.js, Astro, Vite, React Three Fiber, React Flow, Responsive
+        Design, Accessibility (WCAG)
+      </p>
+      <p class="skill">
+        <b>Styling:</b> Tailwind CSS, Sass, CSS Modules, shadcn/ui, Radix UI, Material UI, Design
+        Systems, Design Tokens
+      </p>
+      <p class="skill">
+        <b>Backend:</b> Node.js, Express.js, RESTful APIs, MongoDB, PostgreSQL, Supabase, JWT
+        Authentication
+      </p>
+      <p class="skill">
+        <b>Tooling:</b> Git, GitHub Actions, CI/CD, Azure Static Web Apps, Vercel, Playwright,
+        Figma, Postman, Framer Motion, Agile / Scrum
+      </p>
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      <div class="edu__head">
+        <h3 class="edu__degree">B.Tech, Computer Science &amp; Engineering</h3>
+        <span class="role__dates">2017 - 2021</span>
+      </div>
+      <p class="edu__org">
+        Sahrdaya College of Engineering and Technology - APJ Abdul Kalam Technological University
+      </p>
+    </section>
+  </body>
+</html>

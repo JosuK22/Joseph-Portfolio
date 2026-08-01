@@ -37,7 +37,10 @@ export function initSecrets(): void {
 
   window.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
+    // Neither window shares the page's keyboard: the arcade owns its keys,
+    // and the shell has its own prompt for these same secrets.
     if (document.body.classList.contains('arcade-open')) return;
+    if (document.body.classList.contains('shell-open')) return;
     const t = e.target;
     if (
       t instanceof HTMLInputElement ||
@@ -71,7 +74,11 @@ export function initSecrets(): void {
   document.addEventListener('click', (e) => {
     if (!(e.target instanceof Element)) return;
     const dot = e.target.closest('.dot');
-    if (!dot || dot.closest('.arcade')) return;
+    // Only the project cards arm this. Window chrome elsewhere (the arcade,
+    // the terminal) reuses .dot for looks, and clicking those must not
+    // count as the sequence.
+    const bar = dot?.closest('.card__bar');
+    if (!dot || !bar) return;
     const color = dot.classList.contains('dot--r')
       ? 'r'
       : dot.classList.contains('dot--y')
@@ -81,7 +88,6 @@ export function initSecrets(): void {
           : '';
     if (!color) return;
 
-    const bar = dot.closest('.card__bar');
     if (bar !== seqBar) {
       seqBar = bar;
       seq = '';
