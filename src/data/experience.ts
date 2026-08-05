@@ -12,9 +12,10 @@ export const jobs: Job[] = [
     dates: 'Jul 2025 – Present',
     bullets: [
       'Build complex, responsive layouts in Astro using design tokens, reusable layouts, and a scoped component architecture to keep a large UI consistent and maintainable.',
-      'Developed the frontend of a website-management CMS, integrating entirely against backend REST APIs for content creation, editing, and management workflows.',
-      'Delivered multiple production websites end to end, from layout and component design through responsive behaviour and deployment.',
-      'Implemented build-time static generation (including procedurally generated SVG visuals) to minimise runtime JavaScript and improve page-load performance.',
+      'Delivered 8+ production marketing and corporate websites (including VentureFactory.AI, BeyondZ, World Startup Federation, and GETAI Foundation) for a multi-brand startup studio, sharing a common component library and CI/CD pipeline across properties.',
+      "Built the frontend for an in-house headless CMS platform — a React/MUI admin console for content management and submissions review — and typed API clients (with retry/backoff) that consume the CMS's REST API from production client sites.",
+      'Built the frontend of a Next.js corporate site, including a password-gated admin dashboard UI for blog and case-study content with rich-text editing and image upload, integrated against a Supabase backend.',
+      'Implemented advanced interactive frontend features including a Three.js/react-three-fiber 3D globe hero and an AI-persona chat UI, with Playwright test coverage and Azure Static Web Apps CI/CD across dev/prod environments.',
     ],
   },
   {

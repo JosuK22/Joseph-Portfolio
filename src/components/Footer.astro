@@ -1,10 +1,22 @@
 ---
 ---
 
-<footer class="shell">
+<footer class="shell" id="footer">
   <div class="wrap">
     <p class="footer__exit"><a class="footer__cmd" href="#top">~/joseph $ <span class="cmd-txt">cd ~</span> <span class="arrow">↑</span></a></p>
-    <p class="footer__exit footer__exit--last">~/joseph $ <span class="cmd-txt">exit</span><span class="cursor cursor--sm" aria-hidden="true"></span></p>
+
+    <!-- Opens the shell (scripts/terminal.ts). ctrl+K does the same from
+         anywhere, but that key doesn't exist on a phone — this is the door
+         touch devices get. Without JS it's an inert line, as it always was. -->
+    <p class="footer__exit footer__exit--last">
+      <button class="term-open" id="termOpen" type="button">
+        <span aria-hidden="true">~/joseph $ </span>
+        <span class="cmd-txt">open terminal</span>
+        <span class="cursor cursor--sm" aria-hidden="true"></span>
+        <kbd class="term-open__kbd">ctrl K</kbd>
+      </button>
+    </p>
+
     <p class="footer__copy">© 2026 Joseph K Anoj · built with Astro · hosted at josephk.dev</p>
   </div>
 </footer>

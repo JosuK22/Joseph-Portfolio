@@ -13,3 +13,7 @@ yarn-error.log*
 .env.production
 # macOS
 .DS_Store
+# temporary files
+temp/
+# resume generator preview output (the live CV is public/resume.pdf, tracked)
+resume/generated-resume.pdf
