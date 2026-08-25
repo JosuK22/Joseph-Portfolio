@@ -897,7 +897,9 @@ body.arcade-open { overflow: hidden; }
   display: flex;
   flex-direction: column;
   width: min(680px, 100%);
-  max-height: min(560px, 78dvh);
+  /* fixed, not max- — the window keeps one height and the log scrolls
+     inside it, so it never grows or jumps as output is printed */
+  height: min(560px, 78dvh);
   background: var(--panel);
   border: 1px solid var(--border-lit);
   border-radius: 4px;
@@ -936,7 +938,9 @@ body.arcade-open { overflow: hidden; }
   line-height: 1.65;
 }
 .tw__log {
-  flex: 1;
+  /* grow only to the output's own height, then scroll — so the prompt
+     sits directly under the last line instead of at the window's floor */
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -976,7 +980,7 @@ body.shell-open { overflow: hidden; }
    pin the window to the top so the prompt stays above it. */
 @media (max-width: 720px) {
   .tw { align-items: flex-start; padding: 12px; }
-  .tw__win { max-height: min(460px, 70dvh); margin-top: 8px; }
+  .tw__win { height: min(460px, 70dvh); margin-top: 8px; }
   .tw__body { font-size: 14px; }
 }
 

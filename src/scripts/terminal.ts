@@ -37,7 +37,7 @@ const FILES: Record<string, string[]> = {
     'email     josephkanoj@gmail.com',
     'whatsapp  +91 97447 88125',
     'github    github.com/JosuK22',
-    'linkedin  linkedin.com/in/josephkanoj',
+    'linkedin  linkedin.com/in/joseph-k-anoj',
   ],
   'stack.txt': [
     'languages  TypeScript · JavaScript · Java · Python · SQL',
@@ -193,6 +193,12 @@ const COMMANDS: Record<string, Command> = {
         go(target, ctx);
         return;
       }
+      // Not a section, and deliberately not advertised: `cd games` is a third
+      // way into the arcade listing, for anyone who tries walking there.
+      if (target === 'games' || target === '/usr/games' || target === 'usr/games') {
+        listGames(ctx);
+        return;
+      }
       ctx.print([err(`cd: ${target}: no such section`), muted('try `ls`')]);
     },
   },
@@ -259,7 +265,7 @@ const COMMANDS: Record<string, Command> = {
 
   linkedin: {
     help: 'open linkedin',
-    run: (_a, ctx) => openUrl('https://linkedin.com/in/josephkanoj', ctx, 'linkedin'),
+    run: (_a, ctx) => openUrl('https://linkedin.com/in/joseph-k-anoj', ctx, 'linkedin'),
   },
 
   whatsapp: {
