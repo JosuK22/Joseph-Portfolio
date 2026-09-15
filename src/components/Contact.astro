@@ -2,9 +2,9 @@
 // The contact form sends mail via EmailJS (no backend needed for a static site),
 // same setup as the old portfolio — EmailJS relays the submission to
 // josephkanoj@gmail.com without exposing the address in this code.
-const EMAILJS_SERVICE_ID = 'service_9t1jati';
-const EMAILJS_TEMPLATE_ID = 'template_lspheld';
-const EMAILJS_PUBLIC_KEY = 'vgl13mOPDDcS2GizB';
+const EMAILJS_SERVICE_ID = 'service_vhtl0uo';
+const EMAILJS_TEMPLATE_ID = 'template_aulc0yc';
+const EMAILJS_PUBLIC_KEY = 'DvnMp6k2n_cmhw1vz';
 ---
 
 <section class="section shell" id="contact">
@@ -93,6 +93,25 @@ const EMAILJS_PUBLIC_KEY = 'vgl13mOPDDcS2GizB';
       status.className = 'form__status' + (kind ? ' ' + kind : '');
     };
 
+    // sendForm posts this form's own fields, so every {{placeholder}} the EmailJS
+    // template was authored against has to exist here *by name*. Templates get
+    // written with different conventions ({{from_name}}, {{user_email}},
+    // {{reply_to}}...), and a placeholder with no matching field renders empty —
+    // which is what EmailJS rejects with "the recipient address is empty".
+    // Mirror the three real values into the usual aliases just before sending.
+    const aliasesFor = (name: string, email: string, message: string) => ({
+      from_name: name,
+      user_name: name,
+      from_email: email,
+      user_email: email,
+      reply_to: email,
+      user_message: message,
+      // The stock EmailJS "Contact Us" template puts {{title}} in the subject
+      // and {{time}} in the body; neither is a form field, so fill them here.
+      title: "Portfolio message from " + name,
+      time: new Date().toLocaleString(),
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -121,15 +140,33 @@ const EMAILJS_PUBLIC_KEY = 'vgl13mOPDDcS2GizB';
       btn.textContent = 'sending...';
       setStatus('', '');
 
+      const aliasNodes = Object.entries(aliasesFor(name, email, message))
+        .filter(([key]) => !form.elements.namedItem(key))
+        .map(([key, value]) => {
+          const el = document.createElement('input');
+          el.type = 'hidden';
+          el.name = key;
+          el.value = value;
+          form.appendChild(el);
+          return el;
+        });
+
       try {
         await emailjs.sendForm(serviceId, templateId, form, publicKey);
         form.reset();
         setStatus('message sent ✓ — thanks, I’ll be in touch.', 'ok');
         successSound.currentTime = 0;
         successSound.play().catch(() => {});
-      } catch {
+      } catch (err) {
+        // EmailJS rejects with { status, text }. Without logging it every failure
+        // — blocked origin, wrong template variable, exhausted quota — looks the
+        // same from the outside, so keep the visitor message friendly but put the
+        // real reason in the console.
+        const detail = err as { status?: number; text?: string } | undefined;
+        console.error('[contact] EmailJS send failed:', detail?.status, detail?.text ?? err);
         setStatus('something went wrong sending that. try again, or email me directly.', 'err');
       } finally {
+        aliasNodes.forEach((el) => el.remove());
         btn.disabled = false;
         btn.textContent = original;
       }
