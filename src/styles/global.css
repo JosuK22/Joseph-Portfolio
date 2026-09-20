@@ -734,51 +734,198 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .xs__other { margin-top: 16px; font-size: 13px; color: var(--muted); }
 
 /* ============================================================
-   EXPERIENCE
+   EXPERIENCE — collapsed cards that scan in seconds, expanding
+   into a structured record. Same borders, glow and disclosure
+   language as the skills section; calmer, and never animated
+   on its own.
    ============================================================ */
-.jobs { display: flex; flex-direction: column; gap: 18px; margin-top: 28px; }
-.job {
+.xp-list { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+
+.xp {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 3px;
-  padding: 26px 28px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.job:hover {
+.xp:hover { border-color: var(--border-lit); }
+.xp.is-open {
   border-color: var(--border-lit);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 18px rgba(0, 255, 65, 0.07);
 }
-.job__head {
+
+/* ---- the collapsed card is the button ---- */
+.xp__h { margin: 0; font-weight: 400; }
+.xp__head {
+  display: block;
+  width: 100%;
+  padding: 22px 24px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  text-align: left;
+}
+.xp__idx {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+.xp__top {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 18px;
+  gap: 8px 20px;
   flex-wrap: wrap;
-  margin-bottom: 6px;
 }
-.job__role {
+.xp__company {
   font-family: var(--font-display);
   font-size: 27px;
+  line-height: 1.05;
   color: var(--accent);
   text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
+  transition: text-shadow 0.2s ease;
 }
-.job__dates { font-size: 13px; color: var(--muted); white-space: nowrap; }
-.job__company { font-size: 14px; color: var(--text); margin-bottom: 16px; }
-.job__bullets { display: flex; flex-direction: column; gap: 9px; }
-.job__bullet {
-  font-size: 14px;
+.xp:hover .xp__company,
+.xp.is-open .xp__company { text-shadow: 0 0 10px rgba(0, 255, 65, 0.45); }
+.xp__dates { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.xp__role { display: block; font-size: 14px; color: var(--text); margin-top: 4px; }
+
+/* role category · project count */
+.xp__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.xp__count::before {
+  content: '·';
+  margin-right: 10px;
+  color: var(--border-lit);
+}
+.xp__preview {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
   color: var(--text);
-  line-height: 1.65;
-  padding-left: 20px;
+  opacity: 0.85;
+}
+
+/* ---- expand control ---- */
+.xp__cta {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+  transition: color 0.18s ease;
+}
+.xp__head:hover .xp__cta,
+.xp__head:focus-visible .xp__cta { color: var(--accent); }
+/* fixed width, so ">" growing to ">>" on hover shifts nothing */
+.xp__chev {
+  display: inline-block;
+  width: 1.6em;
+  text-align: left;
+}
+.xp__chev::before { content: '>'; }
+.xp__head:hover .xp__chev::before,
+.xp__head:focus-visible .xp__chev::before { content: '>>'; }
+.xp__cta-close { display: none; }
+.xp.is-open .xp__cta-open { display: none; }
+.xp.is-open .xp__cta-close { display: inline; }
+
+/* ---- expanded record ---- */
+.xp__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.32s ease, visibility 0s linear 0.32s;
+}
+.xp.is-open .xp__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 0.32s ease;
+}
+.xp__inner { overflow: hidden; min-height: 0; }
+.xp__sec { padding: 0 24px; }
+.xp__sec:first-child { border-top: 1px solid var(--border); padding-top: 22px; }
+.xp__sec:last-child { padding-bottom: 24px; }
+.xp__sec + .xp__sec { margin-top: 26px; }
+
+.xp__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+/* the hairline runs from the label to the edge of the card */
+.xp__label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.xp__label-n { color: var(--border-lit); }
+
+.xp__bullets { display: flex; flex-direction: column; gap: 9px; }
+.xp__bullet {
   position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
   text-wrap: pretty;
 }
-.job__bullet::before {
+.xp__bullet::before {
   content: '›';
   position: absolute;
   left: 0;
   color: var(--muted);
 }
+
+/* ---- project modules: deliberately subordinate to the card ---- */
+.xp__projects { display: flex; flex-direction: column; gap: 10px; list-style: none; padding: 0; }
+.xpp {
+  position: relative;
+  padding: 14px 16px 14px 46px;
+  background: rgba(10, 14, 10, 0.5);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.xpp__idx {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  opacity: 0.8;
+}
+.xpp__name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  color: var(--accent);
+  margin: 0 0 4px;
+}
+.xpp__desc { font-size: 13px; line-height: 1.6; color: var(--text); text-wrap: pretty; }
+.xpp__tech { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.xp__stack { font-size: 13px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
 
 /* ============================================================
    PROJECTS — terminal-window cards
@@ -1341,9 +1488,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .xs__btn { gap: 12px; min-height: 52px; padding: 10px 14px; }
   .xs__name { font-size: 21px; }
   .xs__items { padding: 2px 14px 16px; }
-  .job { padding: 18px; }
-  .job__role { font-size: 22px; }
-  .job__bullet { font-size: 13px; }
+  .xp__head { padding: 18px 16px; }
+  .xp__top { gap: 2px; }
+  .xp__company { font-size: 23px; }
+  .xp__dates { flex-basis: 100%; } /* date onto its own line under the company */
+  .xp__meta { margin-top: 12px; }
+  .xp__preview { font-size: 12px; }
+  .xp__sec { padding-inline: 16px; }
+  .xp__sec:first-child { padding-top: 18px; }
+  .xp__sec:last-child { padding-bottom: 18px; }
+  .xp__sec + .xp__sec { margin-top: 22px; }
+  .xp__bullet { font-size: 13px; }
+  .xpp { padding: 12px 14px; }
+  .xpp__idx { position: static; display: block; margin-bottom: 2px; }
 
   .proj-grid { grid-template-columns: 1fr; gap: 14px; }
   .card__name { font-size: 22px; }
@@ -1398,6 +1555,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   /* skills: the wall stays lit and still — no power-up, no flicker.
      Hover / focus / tap still reveals each sign's name, instantly. */
   .sign__icon, .sign__name, .stack__panel::after, .xs__item { animation: none !important; }
+  /* experience: cards open and close with no height animation */
+  .xp__panel, .xp.is-open .xp__panel { transition: none !important; }
   .wall__signs { overflow: visible; -webkit-mask-image: none; mask-image: none; }
   .wall__track { animation: none !important; flex-wrap: wrap; width: auto; gap: var(--sign-gap); }
   .wall__set { display: contents; }
@@ -1411,7 +1570,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   html.booted .hero__stage, html.booted .nav { animation: none; }
   *, *::before, *::after { transition: none !important; }
   .btn:hover, .nav__icon:hover,
-  .job:hover, .card:hover, .btn--send:hover:not(:disabled),
+  .card:hover, .btn--send:hover:not(:disabled),
   .card__link:hover .arrow, .contact__row a:hover .arrow,
   .contact__icon:hover, .nav__mobile a:hover { transform: none; }
 }
