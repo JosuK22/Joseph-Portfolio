@@ -416,31 +416,322 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 }
 
 /* ============================================================
-   SKILLS
+   SKILLS — an illuminated sign wall for the core stack, plus
+   "$ explore --all-skills" for the rest.
+   (behaviour lives in Skills.astro; every "off" / booting state
+   is added by JS, so no-JS and reduced-motion visitors always
+   see the wall fully lit)
    ============================================================ */
-.skills { display: flex; flex-direction: column; gap: 22px; margin-top: 28px; }
-.skill-group {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 24px;
-  align-items: start;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
-.skill-group__label { font-size: 14px; color: var(--muted); padding-top: 6px; }
-.skill-group__chips { display: flex; flex-wrap: wrap; gap: 9px; }
-.chip {
-  font-size: 13px;
+
+/* ---- boot log ---- */
+.stack { --wall-pad: 24px; margin-top: 22px; }
+.stack__log { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 20px; }
+.stack--armed .stack__log p { visibility: hidden; }
+.stack--armed .stack__log p.is-on { visibility: visible; }
+
+/* ---- the wall the signs hang on ---- */
+.stack__panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.stack__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(30, 58, 38, 0.22);
+  font-size: 12px;
+}
+.stack__file { color: var(--muted); }
+.stack__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+}
+.stack__led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 7px rgba(0, 255, 65, 0.7);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.stack--armed .stack__status { color: var(--muted); }
+.stack--armed .stack__led { background: var(--border-lit); box-shadow: none; }
+
+/* one-off scan sweep across the wall while it powers up */
+.stack__panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 255, 65, 0) 0%,
+    rgba(0, 255, 65, 0.07) 46%,
+    rgba(0, 255, 65, 0.22) 50%,
+    rgba(0, 255, 65, 0) 51%
+  );
+  background-size: 100% 200%;
+}
+.stack--scan .stack__panel::after { animation: stack-scan 0.9s ease-out both; }
+@keyframes stack-scan {
+  0% { opacity: 1; background-position: 0 100%; }
+  85% { opacity: 1; }
+  100% { opacity: 0; background-position: 0 0%; }
+}
+
+.wall { padding: 26px var(--wall-pad) 20px; }
+.wall__row + .wall__row { margin-top: 26px; }
+.wall__label { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.wall__signs { --sign-gap: 14px; }
+.wall__track { display: flex; flex-wrap: wrap; gap: var(--sign-gap); }
+.wall__set { display: contents; }
+.wall__set--dup { display: none; } /* only the marquee below 1100px uses it */
+.wall__hint { font-size: 12px; color: var(--muted); opacity: 0.75; margin-top: 22px; }
+.wall__hint--tap { display: none; }
+@media (hover: none) {
+  .wall__hint--hover { display: none; }
+  .wall__hint--tap { display: inline; }
+}
+
+/* ---- a single illuminated sign ---- */
+.sign {
+  --lit: 0.82;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 96px;
+  height: 84px;
+  padding: 0;
+  background:
+    radial-gradient(58% 58% at 50% 46%, rgba(0, 255, 65, 0.05), rgba(0, 255, 65, 0) 72%),
+    rgba(10, 14, 10, 0.5);
+  border: 1px solid rgba(30, 58, 38, 0.7);
+  border-radius: 2px;
+  overflow: hidden;
+  font-family: var(--font-body);
+  transition: border-color 0.22s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.sign__icon {
+  grid-area: 1 / 1;
+  width: 44px;
+  height: 44px;
+  opacity: var(--lit);
+  filter: drop-shadow(0 0 7px rgba(0, 255, 65, 0.35));
+  transition: opacity 0.26s ease, filter 0.26s ease;
+}
+.sign__icon--fill { fill: var(--accent); }
+.sign__icon--stroke {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+/* the name lives in the sign's own space — revealing it never moves anything */
+.sign__name {
+  grid-area: 1 / 1;
+  max-width: 100%;
+  padding-inline: 7px;
+  font-size: 13px;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+  opacity: 0;
+  transition: opacity 0.26s ease;
+}
+
+/* hover / keyboard focus / pinned by click or tap — all identical */
+.sign:hover,
+.sign:focus-visible,
+.sign.is-named {
+  border-color: var(--border-lit);
+  background:
+    radial-gradient(70% 70% at 50% 50%, rgba(0, 255, 65, 0.09), rgba(0, 255, 65, 0) 72%),
+    rgba(10, 14, 10, 0.5);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.07);
+}
+.sign:hover .sign__icon,
+.sign:focus-visible .sign__icon,
+.sign.is-named .sign__icon { opacity: 0.13; filter: none; }
+.sign:hover .sign__name,
+.sign:focus-visible .sign__name,
+.sign.is-named .sign__name { opacity: 1; }
+/* the name strikes on like a tube starting */
+.sign:hover .sign__name,
+.sign.is-named .sign__name { animation: name-strike 0.26s steps(1, end); }
+@keyframes name-strike {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  40% { opacity: 0.15; }
+  55% { opacity: 1; }
+  70% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* second row: same signage, mounted a little smaller */
+.wall__row--minor .sign { --lit: 0.7; width: 84px; height: 74px; }
+.wall__row--minor .sign__icon { width: 34px; height: 34px; }
+.wall__row--minor .sign__name { font-size: 12px; }
+
+/* ---- power-up: each sign strikes on in a shuffled order ---- */
+.stack--armed .sign__icon { opacity: 0.05; filter: none; }
+.stack--armed .sign { border-color: rgba(30, 58, 38, 0.4); background: rgba(10, 14, 10, 0.5); }
+.stack--boot .sign__icon {
+  animation: sign-boot 0.42s steps(1, end) var(--boot-delay, 0ms) both;
+}
+@keyframes sign-boot {
+  0%   { opacity: 0.05; filter: none; }
+  12%  { opacity: 0.75; }
+  20%  { opacity: 0.08; }
+  34%  { opacity: 1; filter: drop-shadow(0 0 11px rgba(0, 255, 65, 0.75)); }
+  48%  { opacity: 0.3; filter: none; }
+  62%  { opacity: 1; }
+  78%  { opacity: 0.8; }
+  100% { opacity: var(--lit); filter: drop-shadow(0 0 7px rgba(0, 255, 65, 0.35)); }
+}
+
+/* ---- idle flicker: three irregular cuts, one sign at a time ---- */
+.sign--fa .sign__icon { animation: sign-fa 0.34s steps(1, end); }
+.sign--fb .sign__icon { animation: sign-fb 0.18s steps(1, end); }
+.sign--fc .sign__icon { animation: sign-fc 0.28s steps(1, end); }
+@keyframes sign-fa {
+  0%, 10% { opacity: var(--lit); }
+  16% { opacity: 0.4; }
+  24% { opacity: 0.05; }
+  34% { opacity: 0; }
+  44% { opacity: 0.25; }
+  52% { opacity: 0; }
+  60% { opacity: 1; filter: drop-shadow(0 0 12px rgba(0, 255, 65, 0.8)); }
+  72% { opacity: 0.55; filter: none; }
+  86% { opacity: 0.9; }
+  100% { opacity: var(--lit); }
+}
+@keyframes sign-fb {
+  0% { opacity: var(--lit); }
+  30% { opacity: 0.65; }
+  55% { opacity: 0; }
+  70% { opacity: 1; filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.7)); }
+  100% { opacity: var(--lit); filter: drop-shadow(0 0 7px rgba(0, 255, 65, 0.35)); }
+}
+@keyframes sign-fc {
+  0%, 22% { opacity: var(--lit); }
+  30% { opacity: 0.2; }
+  40% { opacity: 0; }
+  62% { opacity: 0; }
+  70% { opacity: 0.8; }
+  82% { opacity: 0.15; }
+  100% { opacity: var(--lit); }
+}
+
+/* ---- additional skills ---- */
+.xs { margin-top: 38px; }
+.xs__cmd {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.xs__cmd .sigil { color: var(--accent); }
+.xs__list { display: flex; flex-direction: column; gap: 8px; }
+.xs__cat {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 6px 12px;
-  transition: border-color 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.chip:hover {
-  border-color: var(--border-lit);
-  color: var(--accent);
-  transform: translateY(-2px);
+.xs__cat:hover { border-color: var(--border-lit); }
+.xs__cat.is-open { border-color: var(--border-lit); box-shadow: 0 0 14px rgba(0, 255, 65, 0.06); }
+.xs__btn {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 18px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  text-align: left;
 }
+.xs__caret { color: var(--muted); font-size: 14px; transition: color 0.18s ease; }
+.xs__name {
+  font-family: var(--font-display);
+  font-size: 23px;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+.xs__count { font-size: 12px; color: var(--muted); }
+.xs__arrow { color: var(--muted); font-size: 14px; transition: transform 0.2s ease, color 0.18s ease; }
+.xs__btn:hover .xs__name,
+.xs__cat.is-open .xs__name { color: var(--accent); text-shadow: 0 0 6px rgba(0, 255, 65, 0.3); }
+.xs__btn:hover .xs__caret,
+.xs__btn:hover .xs__arrow,
+.xs__cat.is-open .xs__caret,
+.xs__cat.is-open .xs__arrow { color: var(--accent); }
+.xs__cat.is-open .xs__arrow { transform: rotate(90deg); }
+
+/* height via the 0fr → 1fr grid trick; visibility keeps collapsed
+   items out of the accessibility tree once the close finishes */
+.xs__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.24s ease, visibility 0s linear 0.24s;
+}
+.xs__cat.is-open .xs__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 0.24s ease;
+}
+.xs__inner { overflow: hidden; min-height: 0; }
+.xs__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 18px 18px 46px; /* aligns under the category name */
+}
+.xs__item {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  background: rgba(10, 14, 10, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 5px 11px;
+}
+/* items print in one after another, like terminal output */
+.xs__cat.is-open .xs__item { animation: xs-in 0.2s steps(2, end) calc(var(--i) * 30ms + 60ms) both; }
+@keyframes xs-in { from { opacity: 0; } to { opacity: 1; } }
+.xs__other { margin-top: 16px; font-size: 13px; color: var(--muted); }
 
 /* ============================================================
    EXPERIENCE
@@ -999,7 +1290,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 @media (max-width: 1099px) and (min-width: 721px) {
   .proj-grid { grid-template-columns: repeat(2, 1fr); }
   .contact-grid { grid-template-columns: 1fr; gap: 30px; }
-  .skill-group { grid-template-columns: 150px 1fr; }
+  .sign { width: 88px; height: 78px; }
+  .sign__icon { width: 40px; height: 40px; }
+  .wall__row--minor .sign { width: 78px; height: 70px; }
+  .wall__row--minor .sign__icon { width: 32px; height: 32px; }
+  .sign__name { font-size: 12px; }
+  .wall__row--minor .sign__name { font-size: 11px; }
 }
 
 /* the five text links don't fit comfortably below ~880px — hand
@@ -1029,8 +1325,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
   .about__text { font-size: 14px; line-height: 1.75; }
 
-  .skill-group { grid-template-columns: 1fr; gap: 10px; }
-
+  .stack { --wall-pad: 14px; }
+  .stack__log { font-size: 12px; margin-bottom: 16px; }
+  .wall { padding: 20px var(--wall-pad) 16px; }
+  .wall__row + .wall__row { margin-top: 20px; }
+  .wall__label { margin-bottom: 11px; }
+  .wall__signs { --sign-gap: 10px; }
+  .wall__hint { margin-top: 18px; }
+  .sign { width: 78px; height: 68px; }
+  .sign__icon { width: 34px; height: 34px; }
+  .sign__name { font-size: 11px; padding-inline: 4px; }
+  .wall__row--minor .sign { width: 72px; height: 62px; }
+  .wall__row--minor .sign__icon { width: 28px; height: 28px; }
+  .wall__row--minor .sign__name { font-size: 10px; letter-spacing: -0.2px; }
+  .xs__btn { gap: 12px; min-height: 52px; padding: 10px 14px; }
+  .xs__name { font-size: 21px; }
+  .xs__items { padding: 2px 14px 16px; }
   .job { padding: 18px; }
   .job__role { font-size: 22px; }
   .job__bullet { font-size: 13px; }
@@ -1045,12 +1355,54 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 /* ============================================================
+   SKILLS — below 1100px a full row of signs no longer fits on one
+   line, so each row drifts instead of wrapping. The track is two
+   identical sets; -50% lands exactly on the seam. Hovering, focusing
+   or pinning a sign holds it still, as does scrolling the section
+   out of view.
+   ============================================================ */
+@media (max-width: 1099px) {
+  .wall__signs {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  }
+  .wall__track {
+    flex-wrap: nowrap;
+    width: max-content;
+    gap: 0;
+    animation: wall-drift var(--mq-dur, 30s) linear infinite;
+  }
+  .wall__set,
+  .wall__set--dup {
+    display: flex;
+    gap: var(--sign-gap);
+    padding-right: var(--sign-gap); /* keeps the seam evenly spaced */
+  }
+  .wall__row--minor .wall__track { --mq-dur: 20s; animation-name: wall-drift-rev; }
+  .wall__signs:hover .wall__track,
+  .wall__signs:focus-within .wall__track,
+  .stack--pinned .wall__track,
+  .stack--idle .wall__track { animation-play-state: paused; }
+  @keyframes wall-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes wall-drift-rev { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+}
+
+/* ============================================================
    REDUCED MOTION — kill blink + all transform-based motion
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .cursor { animation: none; }
   .card__bar .dot { animation: none; }
+  /* skills: the wall stays lit and still — no power-up, no flicker.
+     Hover / focus / tap still reveals each sign's name, instantly. */
+  .sign__icon, .sign__name, .stack__panel::after, .xs__item { animation: none !important; }
+  .wall__signs { overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  .wall__track { animation: none !important; flex-wrap: wrap; width: auto; gap: var(--sign-gap); }
+  .wall__set { display: contents; }
+  .wall__set--dup { display: none; }
+  .stack__log p { visibility: visible !important; }
   /* boot sequence never starts under reduced motion, but if the preference
      flips mid-session make sure nothing stays hidden or animates */
   html.booting .nav, html.booting .hero__stage { opacity: 1; }
@@ -1059,7 +1411,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   html.booted .hero__stage, html.booted .nav { animation: none; }
   *, *::before, *::after { transition: none !important; }
   .btn:hover, .nav__icon:hover,
-  .chip:hover, .job:hover, .card:hover, .btn--send:hover:not(:disabled),
+  .job:hover, .card:hover, .btn--send:hover:not(:disabled),
   .card__link:hover .arrow, .contact__row a:hover .arrow,
   .contact__icon:hover, .nav__mobile a:hover { transform: none; }
 }

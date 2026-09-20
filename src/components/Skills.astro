@@ -1,21 +1,275 @@
 ---
-import { skills } from '../data/skills';
+import { additionalSkills, coreStack, otherExperience } from '../data/skills';
+
+const coreCount = coreStack.reduce((n, row) => n + row.items.length, 0);
+
+// A full row of signs only fits on one line from 1100px up; below that the
+// row becomes a slow marquee (see global.css). The marquee needs a second,
+// identical set of signs to loop seamlessly — that copy is hidden from
+// assistive tech and from the tab order, and display:none on desktop.
+const SETS = [false, true];
 ---
 
 <section class="section shell" id="skills">
   <div class="wrap">
     <h2 class="cmd"><span class="sigil">$</span> ls skills/</h2>
-    <div class="skills">
-      {
-        skills.map((grp) => (
-          <div class="skill-group">
-            <div class="skill-group__label">{grp.label}/</div>
-            <div class="skill-group__chips">
-              {grp.items.map((item) => <span class="chip">{item}</span>)}
-            </div>
-          </div>
-        ))
-      }
+
+    <!-- decorative boot log — the signs below carry the real content -->
+    <div class="stack" data-stack>
+      <div class="stack__log" aria-hidden="true">
+        <p data-log>&gt; scanning technical stack...</p>
+        <p data-log>&gt; initializing modules...</p>
+        <p data-log>&gt; {coreCount} core technologies online<span class="cursor cursor--sm" data-log-cursor></span></p>
+      </div>
+
+      <div class="stack__panel">
+        <div class="stack__bar">
+          <span class="stack__file">core_stack</span>
+          <span class="stack__status">
+            <span class="stack__led" aria-hidden="true"></span>
+            <span data-status>active stack</span>
+          </span>
+        </div>
+
+        <div class="wall">
+          {
+            coreStack.map((row, ri) => (
+              <div class={`wall__row${ri > 0 ? ' wall__row--minor' : ''}`}>
+                <p class="wall__label">// {row.label}</p>
+                <div class="wall__signs">
+                  <div class="wall__track">
+                    {SETS.map((dup) => (
+                      <div class={`wall__set${dup ? ' wall__set--dup' : ''}`} aria-hidden={dup ? 'true' : undefined}>
+                        {row.items.map((s) => (
+                          <button
+                            class="sign"
+                            type="button"
+                            data-sign
+                            aria-pressed="false"
+                            tabindex={dup ? -1 : undefined}
+                          >
+                            <svg
+                              class={`sign__icon sign__icon--${s.icon.mode}`}
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              focusable="false"
+                            >
+                              <path d={s.icon.path} />
+                            </svg>
+                            <span class="sign__name">{s.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+          <p class="wall__hint" aria-hidden="true">
+            <span class="wall__hint--hover">// hover a sign to identify it</span>
+            <span class="wall__hint--tap">// tap a sign to identify it</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="xs">
+      <h3 class="xs__cmd"><span class="sigil">$</span> explore --all-skills</h3>
+      <ul class="xs__list">
+        {
+          additionalSkills.map((cat) => (
+            <li class="xs__cat" data-xs>
+              <button
+                class="xs__btn"
+                type="button"
+                id={`xs-btn-${cat.id}`}
+                aria-expanded="false"
+                aria-controls={`xs-panel-${cat.id}`}
+              >
+                <span class="xs__caret" aria-hidden="true">&gt;</span>
+                <span class="xs__name">{cat.label}</span>
+                <span class="xs__count">
+                  {cat.items.length}
+                  <span class="sr-only"> skills</span>
+                </span>
+                <span class="xs__arrow" aria-hidden="true">→</span>
+              </button>
+              <div class="xs__panel" id={`xs-panel-${cat.id}`} role="region" aria-labelledby={`xs-btn-${cat.id}`}>
+                <div class="xs__inner">
+                  <ul class="xs__items">
+                    {cat.items.map((item, i) => (
+                      <li class="xs__item" style={`--i: ${i}`}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="xs__other">// also worked with: {otherExperience.join(' · ')}</p>
     </div>
   </div>
 </section>
+
+<script>
+  const stack = document.querySelector<HTMLElement>('[data-stack]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // ---- additional-skills disclosure rows ----
+  document.querySelectorAll<HTMLElement>('[data-xs]').forEach((cat) => {
+    const btn = cat.querySelector('button');
+    btn?.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      cat.classList.toggle('is-open', open);
+    });
+  });
+
+  if (stack) {
+    const signs = Array.from(stack.querySelectorAll<HTMLElement>('[data-sign]'));
+    // Below 1100px each row is a marquee, so half the signs are the hidden
+    // loop copy; above it that copy is display:none. Only what's on screen
+    // should light up or flicker.
+    const litSigns = () => signs.filter((s) => s.offsetParent !== null);
+
+    // ---- identify a sign: hover and :focus-visible are CSS; a click (or
+    // Enter/Space, or a tap on a touch screen) pins the name on, which also
+    // holds the marquee still so the name can be read ----
+    const syncPinned = () =>
+      stack.classList.toggle('stack--pinned', signs.some((s) => s.classList.contains('is-named')));
+    const clearPinned = (except?: HTMLElement) => {
+      signs.forEach((s) => {
+        if (s === except) return;
+        s.classList.remove('is-named');
+        s.setAttribute('aria-pressed', 'false');
+      });
+      syncPinned();
+    };
+    signs.forEach((sign) => {
+      sign.addEventListener('click', () => {
+        const on = !sign.classList.contains('is-named');
+        clearPinned(sign);
+        sign.classList.toggle('is-named', on);
+        sign.setAttribute('aria-pressed', String(on));
+        syncPinned();
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!(e.target instanceof Element) || !e.target.closest('[data-sign]')) clearPinned();
+    });
+
+    // ---- power-up, then the wall's idle flicker ----
+    if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+      const lines = Array.from(stack.querySelectorAll<HTMLElement>('[data-log]'));
+      const cursor = stack.querySelector<HTMLElement>('[data-log-cursor]');
+      const status = stack.querySelector<HTMLElement>('[data-status]');
+      const rand = (min: number, max: number) => min + Math.random() * (max - min);
+      const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+
+      let inView = false;
+      let online = false;
+      let timer = 0;
+      let pairTimer = 0;
+
+      const showLine = (i: number) => {
+        lines[i].classList.add('is-on');
+        if (cursor) lines[i].appendChild(cursor);
+      };
+      stack.classList.add('stack--armed');
+      if (status) status.textContent = 'standby';
+      showLine(0);
+
+      const powerOn = () => {
+        showLine(1);
+        stack.classList.add('stack--scan', 'stack--boot');
+        // Signs come on one at a time, in a shuffled order — never a wave
+        // and never all at once.
+        const order = litSigns();
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+        const step = Math.min(75, 1000 / Math.max(order.length, 1));
+        order.forEach((sign, place) => {
+          sign.style.setProperty('--boot-delay', `${Math.round(place * step + rand(0, 60))}ms`);
+        });
+        setTimeout(() => {
+          showLine(2);
+          stack.classList.remove('stack--armed', 'stack--boot', 'stack--scan');
+          if (status) status.textContent = 'active stack';
+          online = true;
+          schedule();
+        }, 1500);
+      };
+
+      // One pending timer (plus, sometimes, a second sign a beat later).
+      // Nothing runs while the section is off screen or the tab is hidden.
+      const FLICKERS = ['sign--fa', 'sign--fb', 'sign--fc'];
+      const flickerOne = () => {
+        const sign = pick(litSigns().filter((s) => !s.matches(':hover') && !s.classList.contains('is-named')));
+        if (!sign) return;
+        const cls = pick(FLICKERS);
+        sign.classList.add(cls);
+        setTimeout(() => sign.classList.remove(cls), 460);
+      };
+      const schedule = () => {
+        clearTimeout(timer);
+        if (!online || !inView || document.hidden) return;
+        timer = window.setTimeout(() => {
+          flickerOne();
+          // now and then a second sign goes just after the first
+          if (Math.random() < 0.3) {
+            clearTimeout(pairTimer);
+            pairTimer = window.setTimeout(flickerOne, rand(120, 420));
+          }
+          schedule();
+        }, rand(2200, 5200));
+      };
+
+      let booted = false;
+      const start = () => {
+        if (booted) return;
+        booted = true;
+        // Never power up behind the hero's intro (html.booting hides
+        // everything below the hero) — wait for it to hand over.
+        const root = document.documentElement;
+        if (!root.classList.contains('booting')) return powerOn();
+        const mo = new MutationObserver(() => {
+          if (root.classList.contains('booting')) return;
+          mo.disconnect();
+          powerOn();
+        });
+        mo.observe(root, { attributes: true, attributeFilter: ['class'] });
+      };
+
+      new IntersectionObserver(
+        ([entry]) => {
+          inView = entry.isIntersecting;
+          // the marquee rests too while the section is off screen
+          stack.classList.toggle('stack--idle', !inView);
+          if (inView && entry.intersectionRatio >= 0.25) start();
+          schedule();
+        },
+        { threshold: [0, 0.25] }
+      ).observe(stack);
+      document.addEventListener('visibilitychange', schedule);
+
+      // If reduced motion is switched on mid-session, settle into the
+      // static, fully lit wall.
+      reduceMotion.addEventListener('change', (e) => {
+        if (!e.matches) return;
+        online = false;
+        clearTimeout(timer);
+        clearTimeout(pairTimer);
+        stack.classList.remove('stack--armed', 'stack--boot', 'stack--scan');
+        signs.forEach((s) => s.classList.remove(...FLICKERS));
+        lines.forEach((l) => l.classList.add('is-on'));
+        if (status) status.textContent = 'active stack';
+      });
+    }
+  }
+</script>
