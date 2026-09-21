@@ -928,29 +928,15 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .xp__stack { font-size: 13px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
 
 /* ============================================================
-   PROJECTS — terminal-window cards
+   PROJECTS — an archive of terminal modules. A collapsed card is a
+   scan line: name, one-liner, type, three technologies. Everything
+   else waits behind one click. Same borders, glow and disclosure
+   language as the experience cards, so the two read as one system.
    ============================================================ */
-.proj-label { font-size: 14px; color: var(--muted); margin: 0 0 16px; }
-.proj-label--gap { margin-top: 36px; }
-.proj-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-.card:hover {
-  border-color: var(--border-lit);
-  transform: translateY(-4px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
-}
+
+/* ---- window chrome: the title bar and its traffic lights. Kept as it
+   was — the dots are a secret trigger (scripts/secrets.ts) and .dot is
+   shared with the terminal and arcade windows. ---- */
 .card__bar {
   display: flex;
   align-items: center;
@@ -995,58 +981,288 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   }
 }
 .card__file { font-size: 12px; color: var(--muted); margin-left: 8px; }
-.card__body {
-  padding: 20px 18px;
+
+/* ---- category selector: two terminal tabs ---- */
+.pnav {
   display: flex;
-  flex-direction: column;
-  gap: 13px;
-  flex: 1;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 26px 0 22px;
 }
-.card__name {
-  font-family: var(--font-display);
-  font-size: 25px;
-  color: var(--text);
-  line-height: 1;
-  transition: color 0.18s ease, text-shadow 0.18s ease;
-}
-.card:hover .card__name {
-  color: var(--accent);
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
-}
-.card__desc { font-size: 13px; color: var(--text); line-height: 1.6; flex: 1; text-wrap: pretty; }
-.card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag {
-  font-size: 11px;
-  color: var(--muted);
+.pnav__tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  background: none;
   border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 3px 8px;
+  padding: 9px 14px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  transition: color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.card__links { display: flex; gap: 16px; font-size: 13px; padding-top: 4px; }
-.card__link {
-  color: var(--link);
+.pnav__bracket { color: var(--border-lit); }
+.pnav__count { font-size: 11px; opacity: 0.75; }
+.pnav__tab:hover { color: var(--text); border-color: var(--border-lit); }
+.pnav__tab[aria-selected='true'] {
+  color: var(--accent);
+  border-color: var(--border-lit);
+  box-shadow: 0 0 14px rgba(0, 255, 65, 0.08);
+  text-shadow: 0 0 7px rgba(0, 255, 65, 0.3);
+}
+.pnav__tab[aria-selected='true'] .pnav__bracket { color: var(--accent); }
+
+/* the panel is only a container — never a focus ring of its own */
+.pgroup:focus { outline: none; }
+.pgroup__head { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+.pgroup__n { color: var(--border-lit); }
+
+/* ---- the card ---- */
+.pcards { display: flex; flex-direction: column; gap: 12px; }
+.pcard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pcard:hover { border-color: var(--border-lit); }
+.pcard.is-open {
+  border-color: var(--border-lit);
+  box-shadow: 0 0 18px rgba(0, 255, 65, 0.07);
+}
+
+/* create-clientkit only: a brighter frame and a small flag. Same card,
+   turned up — never a second design. */
+.pcard--featured {
+  border-color: var(--border-lit);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.05);
+}
+.pcard--featured:hover,
+.pcard--featured.is-open { box-shadow: 0 0 22px rgba(0, 255, 65, 0.1); }
+.pcard--featured .pcard__name { color: var(--accent); }
+.pcard__flag {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 7px rgba(0, 255, 65, 0.35);
+  white-space: nowrap;
+}
+.pcard__bar { border-radius: 2px 2px 0 0; }
+
+/* ---- collapsed state: the whole thing is the button ---- */
+.pcard__h { margin: 0; font-weight: 400; }
+.pcard__head {
+  display: block;
+  width: 100%;
+  padding: 18px 20px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  text-align: left;
+}
+.pcard__idx {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+.pcard__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 20px;
+  flex-wrap: wrap;
+}
+.pcard__name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.05;
+  color: var(--text);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.pcard:hover .pcard__name,
+.pcard.is-open .pcard__name {
+  color: var(--accent);
+  text-shadow: 0 0 9px rgba(0, 255, 65, 0.35);
+}
+.pcard__state {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.pcard__status {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 2px 7px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.pcard:hover .pcard__status { border-color: var(--border-lit); color: var(--text); }
+.pcard__year { opacity: 0.75; }
+
+.pcard__tagline {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: var(--text);
   transition: color 0.18s ease;
 }
-.card__link .arrow { display: inline-block; transition: transform 0.18s ease; }
-.card__link:hover, .card__link:focus-visible { color: var(--link-hover); }
-.card__link:hover .arrow, .card__link:focus-visible .arrow { transform: translate(2px, -2px); }
+.pcard:hover .pcard__tagline { color: var(--accent); }
 
-/* groups with more than 6 projects collapse behind "$ ls --all" */
-.proj-grid .card[data-extra] { display: none; }
-.proj-grid.proj-grid--all .card[data-extra] { display: flex; }
-.proj-more {
-  margin-top: 16px;
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: 2px;
-  color: var(--link);
-  font-family: var(--font-body);
+/* category · type */
+.pcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 13px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pcard__type::before {
+  content: '·';
+  margin-right: 10px;
+  color: var(--border-lit);
+}
+.pcard__tags {
+  display: block;
+  margin-top: 7px;
   font-size: 13px;
-  padding: 10px 18px;
+  color: var(--text);
+  opacity: 0.85;
+  transition: opacity 0.18s ease;
+}
+.pcard:hover .pcard__tags { opacity: 1; }
+
+/* ---- expand control ---- */
+.pcard__cta {
+  display: block;
+  margin-top: 15px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+  transition: color 0.18s ease;
+}
+.pcard__head:hover .pcard__cta,
+.pcard__head:focus-visible .pcard__cta { color: var(--accent); }
+/* fixed width, so ">" growing to ">>" on hover shifts nothing */
+.pcard__chev {
+  display: inline-block;
+  width: 1.6em;
+  text-align: left;
+}
+.pcard__chev::before { content: '>'; }
+.pcard__head:hover .pcard__chev::before,
+.pcard__head:focus-visible .pcard__chev::before { content: '>>'; }
+.pcard__cta-close { display: none; }
+.pcard.is-open .pcard__cta-open { display: none; }
+.pcard.is-open .pcard__cta-close { display: inline; }
+
+/* ---- expanded case study ---- */
+.pcard__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.32s ease, visibility 0s linear 0.32s;
+}
+.pcard.is-open .pcard__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 0.32s ease;
+}
+.pcard__inner { overflow: hidden; min-height: 0; }
+.pcard__sec { padding: 0 20px; }
+.pcard__sec:first-child { border-top: 1px solid var(--border); padding-top: 20px; }
+.pcard__sec:last-child { padding-bottom: 22px; }
+.pcard__sec + .pcard__sec { margin-top: 24px; }
+
+.pcard__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+/* the hairline runs from the label to the edge of the card */
+.pcard__label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.pcard__body { font-size: 14px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
+.pcard__sub {
+  margin-top: 16px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pcard__next { border-left: 1px solid var(--border); padding-left: 14px; margin-top: 4px; }
+
+/* a real command, printed like one */
+.pcard__cmd {
+  margin-top: 12px;
+  padding: 9px 12px;
+  background: rgba(10, 14, 10, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 13px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.pcard__cmd-sigil { color: var(--accent); }
+
+.pcard__bullets { display: flex; flex-direction: column; gap: 8px; }
+.pcard__bullet {
+  position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  text-wrap: pretty;
+}
+.pcard__bullet::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+}
+
+.pcard__stack { font-size: 13px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
+
+.pcard__links { display: flex; flex-wrap: wrap; gap: 8px; }
+.pcard__link {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 7px 13px;
+  font-size: 13px;
+  color: var(--link);
   transition: color 0.18s ease, border-color 0.18s ease;
 }
-.proj-more:hover, .proj-more:focus-visible { color: var(--link-hover); border-color: var(--border-lit); }
-.proj-more__count { color: var(--muted); }
+.pcard__link .arrow { display: inline-block; transition: transform 0.18s ease; }
+.pcard__link:hover, .pcard__link:focus-visible { color: var(--link-hover); border-color: var(--border-lit); }
+.pcard__link:hover .arrow, .pcard__link:focus-visible .arrow { transform: translate(2px, -2px); }
 
 /* ============================================================
    EDUCATION
@@ -1435,7 +1651,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
    1100px side-by-side switch so grids never get squeezed)
    ============================================================ */
 @media (max-width: 1099px) and (min-width: 721px) {
-  .proj-grid { grid-template-columns: repeat(2, 1fr); }
   .contact-grid { grid-template-columns: 1fr; gap: 30px; }
   .sign { width: 88px; height: 78px; }
   .sign__icon { width: 40px; height: 40px; }
@@ -1502,8 +1717,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .xpp { padding: 12px 14px; }
   .xpp__idx { position: static; display: block; margin-bottom: 2px; }
 
-  .proj-grid { grid-template-columns: 1fr; gap: 14px; }
-  .card__name { font-size: 22px; }
+  .pnav { margin: 20px 0 18px; gap: 8px; }
+  .pnav__tab { padding: 8px 10px; font-size: 11px; letter-spacing: 1.1px; }
+  .pcard__bar { flex-wrap: wrap; row-gap: 4px; }
+  .pcard__flag { margin-left: 0; flex-basis: 100%; }
+  .pcard__head { padding: 16px 14px; }
+  .pcard__top { gap: 2px; }
+  .pcard__name { font-size: 22px; }
+  .pcard__state { flex-basis: 100%; } /* status onto its own line under the name */
+  .pcard__tagline { font-size: 13px; }
+  .pcard__meta { margin-top: 11px; }
+  .pcard__tags { font-size: 12px; }
+  .pcard__sec { padding-inline: 14px; }
+  .pcard__sec:first-child { padding-top: 16px; }
+  .pcard__sec:last-child { padding-bottom: 16px; }
+  .pcard__sec + .pcard__sec { margin-top: 20px; }
+  .pcard__body, .pcard__bullet { font-size: 13px; }
+  .pcard__links { gap: 7px; }
+  .pcard__link { padding: 8px 11px; font-size: 12px; }
 
   .edu__degree { font-size: 21px; }
 
@@ -1555,8 +1786,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   /* skills: the wall stays lit and still — no power-up, no flicker.
      Hover / focus / tap still reveals each sign's name, instantly. */
   .sign__icon, .sign__name, .stack__panel::after, .xs__item { animation: none !important; }
-  /* experience: cards open and close with no height animation */
-  .xp__panel, .xp.is-open .xp__panel { transition: none !important; }
+  /* experience + projects: cards open and close with no height animation */
+  .xp__panel, .xp.is-open .xp__panel,
+  .pcard__panel, .pcard.is-open .pcard__panel { transition: none !important; }
   .wall__signs { overflow: visible; -webkit-mask-image: none; mask-image: none; }
   .wall__track { animation: none !important; flex-wrap: wrap; width: auto; gap: var(--sign-gap); }
   .wall__set { display: contents; }
@@ -1570,7 +1802,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   html.booted .hero__stage, html.booted .nav { animation: none; }
   *, *::before, *::after { transition: none !important; }
   .btn:hover, .nav__icon:hover,
-  .card:hover, .btn--send:hover:not(:disabled),
-  .card__link:hover .arrow, .contact__row a:hover .arrow,
+  .btn--send:hover:not(:disabled),
+  .pcard__link:hover .arrow, .contact__row a:hover .arrow,
   .contact__icon:hover, .nav__mobile a:hover { transform: none; }
 }

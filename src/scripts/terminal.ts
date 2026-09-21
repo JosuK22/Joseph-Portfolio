@@ -244,7 +244,7 @@ const COMMANDS: Record<string, Command> = {
       a.href = '/resume.pdf';
       // Served at /resume.pdf so old links keep working, but saved under the
       // real CV name — same-origin, so the browser honours this.
-      a.download = 'Joseph-K-Anoj-Frontend-Developer-CV.pdf';
+      a.download = 'Joseph-K-Anoj-Frontend-Engineer-CV.pdf';
       a.click();
       ctx.print([muted('downloading resume.pdf...')]);
     },

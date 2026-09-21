@@ -28,12 +28,15 @@ src/
 public/
   favicon.svg             # phosphor terminal glyph
   og.png                  # social link-preview card (1200x630)
-  resume.pdf              # generated — see below
+  resume.pdf              # the live CV download — see below
   images/                 # joseph-retro-clean.png (particle source)
   sounds/                 # UI click + form-success blips
 resume/
-  resume.html             # the resume source — edit this, not the PDF
-  build-resume.mjs        # renders resume.html -> public/resume.pdf via headless Chrome
+  Joseph-K-Anoj-Frontend-Engineer-CV.pdf   # the live CV; copied to public/resume.pdf
+  resume.html             # HTML resume generator source (superseded — see below)
+  build-resume.mjs        # renders resume.html -> a PDF via headless Chrome
+emailjs/
+  notification-template.html   # EmailJS template source (git-ignored, local only)
 ```
 
 ## Editing content
@@ -43,25 +46,33 @@ Nearly all copy lives as data, not markup:
 - **Skills** — `src/data/skills.ts`. Groups render in order; add items freely.
   Keep `stack.txt` in `src/scripts/terminal.ts` roughly in sync (the shell prints it).
 - **Experience** — `src/data/experience.ts`.
-- **Projects** — `src/data/projects.ts`. The grid reflows on its own, and once a
-  group passes 6 entries the extras collapse behind a `$ ls --all` toggle, so put
-  the strongest work at the top. `live` / `repo` set to `null` simply hide that link.
+- **Projects** — `src/data/projects.ts`. The section is a progressive-disclosure
+  archive: `[ personal ]` / `[ client ]` tabs, and a collapsed card showing only
+  `name`, `tagline`, `type`, `status`/`year` and `tags` (2–4 technologies). Every
+  other field renders after a click, and only when it has a value — so add
+  `built`, `features`, `architecture`, `context` or `nextRelease` where a project
+  has one, and leave them out where it does not. Counts and index numbers come
+  from the arrays, `featured: true` gives one project a slightly stronger card,
+  and `live` / `repo` / `npm` / `docs` set to `null` or omitted hide that link.
 
 ## Resume
 
 The live download is a **hand-authored CV**, not generated:
 
 ```
-resume/Joseph-K-Anoj-Frontend-Developer-CV.pdf   <- the real source of truth
-public/resume.pdf                                <- a copy of it; this is what ships
+resume/Joseph-K-Anoj-Frontend-Engineer-CV.pdf   <- the real source of truth
+public/resume.pdf                               <- a copy of it; this is what ships
 ```
 
 To update it: edit the CV in whatever tool authored it, export a fresh PDF over
-`resume/Joseph-K-Anoj-Frontend-Developer-CV.pdf`, then copy it into place:
+`resume/Joseph-K-Anoj-Frontend-Engineer-CV.pdf`, then copy it into place:
 
 ```bash
-cp resume/Joseph-K-Anoj-Frontend-Developer-CV.pdf public/resume.pdf
+cp resume/Joseph-K-Anoj-Frontend-Engineer-CV.pdf public/resume.pdf
 ```
+
+`resume/Joseph-K-Anoj-Frontend-Developer-CV.pdf` is the previous CV — superseded,
+and no longer shipped.
 
 It stays served at `/resume.pdf` so existing links and bookmarks keep working, but the
 hero button and the terminal's `resume` command both set `download=` so it saves under the

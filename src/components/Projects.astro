@@ -2,76 +2,330 @@
 import { projects } from '../data/projects';
 import type { Project } from '../data/projects';
 
-const groups: { label: string; items: Project[] }[] = [
-  { label: '// client & freelance', items: projects.client },
-  { label: '// personal', items: projects.personal },
-];
+const pad = (n: number) => String(n).padStart(2, '0');
 
-// Groups grow over time (see src/data/projects.ts) — beyond this many
-// cards, the rest collapse behind a "$ ls --all" toggle.
-const VISIBLE_LIMIT = 6;
+const groups: { id: string; label: string; items: Project[] }[] = [
+  { id: 'personal', label: 'personal', items: projects.personal },
+  { id: 'client', label: 'client', items: projects.client },
+];
 ---
 
 <section class="section shell" id="projects">
   <div class="wrap">
     <h2 class="cmd"><span class="sigil">$</span> ls projects/</h2>
 
+    <!-- Category selector. Two real tabs, so ←/→, Home/End and the active
+         state all come from the tab pattern rather than being reinvented. -->
+    <div class="pnav" role="tablist" aria-label="Project categories">
+      {
+        groups.map((group, gi) => (
+          <button
+            class="pnav__tab"
+            type="button"
+            role="tab"
+            id={`ptab-${group.id}`}
+            aria-controls={`ppanel-${group.id}`}
+            aria-selected={gi === 0 ? 'true' : 'false'}
+            tabindex={gi === 0 ? undefined : -1}
+            data-ptab={group.id}
+          >
+            <span class="pnav__bracket" aria-hidden="true">[</span>
+            <span class="pnav__label">{group.label}</span>
+            <span class="pnav__count">// {pad(group.items.length)}</span>
+            <span class="pnav__bracket" aria-hidden="true">]</span>
+          </button>
+        ))
+      }
+    </div>
+
     {
       groups.map((group, gi) => (
-        <>
-          <p class={`proj-label${gi > 0 ? ' proj-label--gap' : ''}`}>{group.label}</p>
-          <div class="proj-grid">
+        <div
+          class="pgroup"
+          id={`ppanel-${group.id}`}
+          role="tabpanel"
+          aria-labelledby={`ptab-${group.id}`}
+          tabindex="0"
+          data-ppanel={group.id}
+          hidden={gi === 0 ? undefined : true}
+        >
+          <p class="pgroup__head">
+            // {group.label} projects
+            <span class="pgroup__n"> // {pad(group.items.length)}</span>
+          </p>
+
+          <div class="pcards">
             {group.items.map((p, i) => (
-              <article class="card" data-extra={i >= VISIBLE_LIMIT ? '' : undefined}>
-                <div class="card__bar">
+              <article class={`pcard${p.featured ? ' pcard--featured' : ''}`} data-pcard>
+                {/* Window chrome sits outside the trigger on purpose: the three
+                    dots are their own secret (see scripts/secrets.ts), and
+                    nesting them in a button would make every tap of one open
+                    the card as well. */}
+                <div class="card__bar pcard__bar">
                   <span class="dot dot--r" aria-hidden="true" />
                   <span class="dot dot--y" aria-hidden="true" />
                   <span class="dot dot--g" aria-hidden="true" />
                   <span class="card__file">{p.file}</span>
+                  {p.featured && <span class="pcard__flag">featured // {p.type}</span>}
                 </div>
-                <div class="card__body">
-                  <h3 class="card__name">{p.name}</h3>
-                  <p class="card__desc">{p.desc}</p>
-                  <div class="card__tags">
-                    {p.tags.map((t) => (
-                      <span class="tag">{t}</span>
-                    ))}
-                  </div>
-                  <div class="card__links">
-                    {p.live && (
-                      <a class="card__link" href={p.live} target="_blank" rel="noopener">
-                        live <span class="arrow">↗</span>
-                      </a>
+
+                {/* the collapsed card is one real button, so Enter/Space and
+                    focus come for free */}
+                <h3 class="pcard__h">
+                  <button
+                    class="pcard__head"
+                    type="button"
+                    id={`proj-${group.id}-${i}-btn`}
+                    aria-expanded="false"
+                    aria-controls={`proj-${group.id}-${i}-panel`}
+                  >
+                    <span class="pcard__idx" aria-hidden="true">{pad(i + 1)} //</span>
+                    <span class="pcard__top">
+                      <span class="pcard__name">{p.name}</span>
+                      {(p.status || p.year) && (
+                        <span class="pcard__state">
+                          {p.status && <span class="pcard__status">{p.status}</span>}
+                          {p.year && <span class="pcard__year">{p.year}</span>}
+                        </span>
+                      )}
+                    </span>
+                    <span class="pcard__tagline">{p.tagline}</span>
+                    <span class="pcard__meta">
+                      <span class="pcard__cat">{group.label}</span>
+                      <span class="pcard__type">{p.type}</span>
+                    </span>
+                    <span class="pcard__tags">{p.tags.join(' · ')}</span>
+                    <span class="pcard__cta" aria-hidden="true">
+                      <span class="pcard__cta-open">
+                        <span class="pcard__chev" />
+                        view details
+                      </span>
+                      <span class="pcard__cta-close">− collapse</span>
+                    </span>
+                  </button>
+                </h3>
+
+                {/* Only the sections a project actually has are rendered. */}
+                <div
+                  class="pcard__panel"
+                  id={`proj-${group.id}-${i}-panel`}
+                  role="region"
+                  aria-labelledby={`proj-${group.id}-${i}-btn`}
+                >
+                  <div class="pcard__inner">
+                    <section class="pcard__sec">
+                      <h4 class="pcard__label">overview</h4>
+                      <p class="pcard__body">{p.overview}</p>
+                      {p.command && (
+                        <p class="pcard__cmd">
+                          <span class="pcard__cmd-sigil" aria-hidden="true">$ </span>
+                          {p.command}
+                        </p>
+                      )}
+                    </section>
+
+                    {p.context && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">context</h4>
+                        <p class="pcard__body">{p.context}</p>
+                      </section>
                     )}
-                    {p.repo && (
-                      <a class="card__link" href={p.repo} target="_blank" rel="noopener">
-                        GitHub <span class="arrow">↗</span>
-                      </a>
+
+                    {p.built && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">what I built</h4>
+                        <p class="pcard__body">{p.built}</p>
+                      </section>
+                    )}
+
+                    {p.features && p.features.length > 0 && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">key features</h4>
+                        <ul class="pcard__bullets">
+                          {p.features.map((f) => (
+                            <li class="pcard__bullet">{f}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+
+                    {p.architecture && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">architecture</h4>
+                        <p class="pcard__body">{p.architecture}</p>
+                      </section>
+                    )}
+
+                    <section class="pcard__sec">
+                      <h4 class="pcard__label">stack</h4>
+                      <p class="pcard__stack">{(p.stack ?? p.tags).join(' · ')}</p>
+                    </section>
+
+                    {(p.statusNote || p.status) && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">status</h4>
+                        <p class="pcard__body">{p.statusNote ?? p.status}</p>
+                        {p.nextRelease && (
+                          <div class="pcard__next">
+                            <p class="pcard__sub">next release // in development</p>
+                            <p class="pcard__body">{p.nextRelease}</p>
+                          </div>
+                        )}
+                      </section>
+                    )}
+
+                    {(p.live || p.repo || p.npm || p.docs) && (
+                      <section class="pcard__sec">
+                        <h4 class="pcard__label">links</h4>
+                        <div class="pcard__links">
+                          {p.live && (
+                            <a class="pcard__link" href={p.live} target="_blank" rel="noopener">
+                              live <span class="arrow">↗</span>
+                            </a>
+                          )}
+                          {p.repo && (
+                            <a class="pcard__link" href={p.repo} target="_blank" rel="noopener">
+                              GitHub <span class="arrow">↗</span>
+                            </a>
+                          )}
+                          {p.npm && (
+                            <a class="pcard__link" href={p.npm} target="_blank" rel="noopener">
+                              npm <span class="arrow">↗</span>
+                            </a>
+                          )}
+                          {p.docs && (
+                            <a class="pcard__link" href={p.docs} target="_blank" rel="noopener">
+                              docs <span class="arrow">↗</span>
+                            </a>
+                          )}
+                        </div>
+                      </section>
                     )}
                   </div>
                 </div>
               </article>
             ))}
           </div>
-          {group.items.length > VISIBLE_LIMIT && (
-            <button class="proj-more" type="button" data-proj-more aria-expanded="false">
-              $ ls --all <span class="proj-more__count">(+{group.items.length - VISIBLE_LIMIT} more)</span>
-            </button>
-          )}
-        </>
+        </div>
       ))
     }
+
+    <!-- Without JS the tabs cannot switch, so both categories simply stay
+         open — every project is in the markup either way. -->
+    <noscript>
+      <style>
+        .pnav { display: none; }
+        .pgroup[hidden] { display: block; }
+      </style>
+    </noscript>
   </div>
 </section>
 
 <script>
-  // "$ ls --all" reveals the collapsed cards of its own group, then removes
-  // itself — everything stays visible from there on.
-  document.querySelectorAll<HTMLButtonElement>('[data-proj-more]').forEach((btn) => {
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-pcard]'));
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-ptab]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-ppanel]'));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // must match the panel transition in global.css
+  const OPEN_MS = 320;
+
+  /** Switching category should never leave a card open out of sight — and only
+   *  one is ever open at a time anyway. */
+  const closeAll = () => {
+    cards.forEach((card) => {
+      card.classList.remove('is-open');
+      card.querySelector('button')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  // ---- category tabs -------------------------------------------------
+  const select = (tab: HTMLButtonElement, focus: boolean) => {
+    closeAll();
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    panels.forEach((panel) => {
+      panel.hidden = panel.dataset.ppanel !== tab.dataset.ptab;
+    });
+    // Only keyboard navigation moves focus; a click already has it.
+    if (focus) tab.focus();
+  };
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab, false));
+    tab.addEventListener('keydown', (e) => {
+      const next =
+        e.key === 'ArrowRight' || e.key === 'ArrowDown'
+          ? tabs[(i + 1) % tabs.length]
+          : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+            ? tabs[(i - 1 + tabs.length) % tabs.length]
+            : e.key === 'Home'
+              ? tabs[0]
+              : e.key === 'End'
+                ? tabs[tabs.length - 1]
+                : null;
+      if (!next) return;
+      e.preventDefault();
+      select(next, true);
+    });
+  });
+
+  // ---- one open project at a time -------------------------------------
+  cards.forEach((card) => {
+    const btn = card.querySelector('button');
+    if (!btn) return;
+
     btn.addEventListener('click', () => {
-      btn.previousElementSibling?.classList.add('proj-grid--all');
-      btn.setAttribute('aria-expanded', 'true');
-      btn.remove();
+      const opening = btn.getAttribute('aria-expanded') !== 'true';
+
+      // Collapsing a card above the one clicked moves it up the page, so hold
+      // the clicked header still: note where it sits now, then correct the
+      // scroll position as the heights animate.
+      const anchor = btn.getBoundingClientRect().top;
+
+      cards.forEach((other) => {
+        // single-open: the rest close
+        const otherBtn = other.querySelector('button');
+        const on = other === card && opening;
+        other.classList.toggle('is-open', on);
+        otherBtn?.setAttribute('aria-expanded', String(on));
+      });
+
+      // html has scroll-behavior: smooth, so every correction below has to
+      // opt out of it explicitly — a smooth scroll would still be easing when
+      // the next frame measures, and the two would fight each other.
+      const correct = (drift: number) => window.scrollBy({ top: drift, behavior: 'instant' });
+
+      if (reduceMotion.matches) {
+        correct(btn.getBoundingClientRect().top - anchor);
+        return;
+      }
+
+      // Re-anchor each frame for the length of the transition. A single pass
+      // isn't enough — the height changes gradually.
+      let stop = false;
+      const release = () => {
+        stop = true;
+      };
+      // never fight a user who starts scrolling mid-animation
+      window.addEventListener('wheel', release, { once: true, passive: true });
+      window.addEventListener('touchmove', release, { once: true, passive: true });
+
+      const until = performance.now() + OPEN_MS;
+      const hold = () => {
+        if (stop) return cleanup();
+        const drift = btn.getBoundingClientRect().top - anchor;
+        if (drift) correct(drift);
+        if (performance.now() < until) requestAnimationFrame(hold);
+        else cleanup();
+      };
+      const cleanup = () => {
+        window.removeEventListener('wheel', release);
+        window.removeEventListener('touchmove', release);
+      };
+      requestAnimationFrame(hold);
     });
   });
 </script>
