@@ -178,6 +178,7 @@ export const projects: ProjectGroups = {
       name: 'Workflow Builder',
       tagline: 'Dynamic flowchart builder',
       type: 'web app',
+      status: 'live',
       tags: ['React Flow', 'Context API', 'localStorage'],
       stack: ['React Flow', 'Context API', 'localStorage'],
       overview:
@@ -190,6 +191,7 @@ export const projects: ProjectGroups = {
       name: 'Versa Hub',
       tagline: 'Multi-API personal dashboard',
       type: 'web app',
+      status: 'live',
       tags: ['React', 'REST APIs', 'Vite'],
       stack: ['React', 'REST APIs', 'Vite'],
       overview:
