@@ -735,9 +735,10 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 
 /* ============================================================
    EXPERIENCE — collapsed cards that scan in seconds, expanding
-   into a structured record. Same borders, glow and disclosure
-   language as the skills section; calmer, and never animated
-   on its own.
+   into a structured record read one tab at a time: overview,
+   responsibilities, projects, stack. Same borders, glow and
+   disclosure language as the skills section; calmer, and never
+   animated on its own.
    ============================================================ */
 .xp-list { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
 
@@ -791,9 +792,32 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .xp:hover .xp__company,
 .xp.is-open .xp__company { text-shadow: 0 0 10px rgba(0, 255, 65, 0.45); }
 .xp__dates { font-size: 13px; color: var(--muted); white-space: nowrap; }
-.xp__role { display: block; font-size: 14px; color: var(--text); margin-top: 4px; }
 
-/* role category · project count */
+/* role · status */
+.xp__rolerow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.xp__role { font-size: 14px; color: var(--text); }
+/* only the current role gets a badge — everything else reads its dates */
+.xp__status {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--border-lit);
+  border-radius: 2px;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 7px rgba(0, 255, 65, 0.3);
+}
+
+/* role category · location · project count */
 .xp__meta {
   display: flex;
   flex-wrap: wrap;
@@ -805,7 +829,7 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   text-transform: uppercase;
   color: var(--muted);
 }
-.xp__count::before {
+.xp__tag + .xp__tag::before {
   content: '·';
   margin-right: 10px;
   color: var(--border-lit);
@@ -855,10 +879,133 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   transition: grid-template-rows 0.32s ease;
 }
 .xp__inner { overflow: hidden; min-height: 0; }
-.xp__sec { padding: 0 24px; }
-.xp__sec:first-child { border-top: 1px solid var(--border); padding-top: 22px; }
-.xp__sec:last-child { padding-bottom: 24px; }
-.xp__sec + .xp__sec { margin-top: 26px; }
+/* Every tab panel is placed in the same grid cell, so the row is as tall as
+   the longest of them and the card keeps one height whichever tab is showing.
+   Switching tabs then changes only what is in that cell — nothing below the
+   card moves. */
+.xp__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--border);
+  padding: 18px 24px 24px;
+}
+.xp__tabs { grid-area: 1 / 1; }
+.xp__tp { grid-area: 2 / 1; min-width: 0; }
+
+/* ---- tabs: four commands, not four buttons ---- */
+.xp__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.xp__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  min-height: 44px; /* touch target — the underline still hugs the text */
+  padding: 0 1px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  transition: color 0.18s ease;
+}
+.xp__tab-sigil { color: var(--border-lit); transition: color 0.18s ease; }
+.xp__tab:hover { color: var(--text); }
+.xp__tab:hover .xp__tab-sigil { color: var(--muted); }
+/* the selected command is lit and underlined by its own cursor rule */
+.xp__tab[aria-selected='true'] {
+  color: var(--accent);
+  text-shadow: 0 0 7px rgba(0, 255, 65, 0.3);
+}
+.xp__tab[aria-selected='true'] .xp__tab-sigil { color: var(--accent); }
+.xp__tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.35);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.18s ease;
+}
+.xp__tab[aria-selected='true']::after { transform: scaleX(1); }
+
+/* ---- the selected record, one tab at a time ---- */
+.xp__tp { transition: opacity 0.18s ease, transform 0.18s ease; }
+.xp__tp:focus { outline: none; } /* a container, never its own focus ring */
+.xp__tp:focus-visible { outline: 1px solid var(--border-lit); outline-offset: 6px; }
+/* An unselected panel keeps its box — that is what holds the height — but
+   `visibility` takes it out of the page: no reading order, no tab stop, no
+   pointer. It leaves instantly and the selected one fades in over it. */
+.xp__tp[hidden] {
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: none;
+}
+.xp__sub { margin-top: 24px; }
+.xp__empty { font-size: 13px; color: var(--muted); }
+
+/* ---- overview: the record's header fields, then one sentence ---- */
+.xpo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 28px;
+  margin: 0;
+}
+.xpo__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.xpo__k {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.xpo__v { margin: 0; font-size: 14px; line-height: 1.55; color: var(--text); }
+.xp__summary {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+/* ---- stack: the same technologies, sorted into shapes ---- */
+.xps { display: flex; flex-direction: column; gap: 16px; }
+.xps__grp { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 4px 16px; }
+.xps__label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 2.1;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.xps__items { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; }
+.xps__item {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: rgba(10, 14, 10, 0.5);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text);
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.xps__item:hover { border-color: var(--border-lit); color: var(--accent); }
 
 .xp__label {
   display: flex;
@@ -878,7 +1025,6 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   height: 1px;
   background: var(--border);
 }
-.xp__label-n { color: var(--border-lit); }
 
 .xp__bullets { display: flex; flex-direction: column; gap: 9px; }
 .xp__bullet {
@@ -925,7 +1071,6 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .xpp__desc { font-size: 13px; line-height: 1.6; color: var(--text); text-wrap: pretty; }
 .xpp__tech { margin-top: 8px; font-size: 12px; color: var(--muted); }
 
-.xp__stack { font-size: 13px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
 
 /* ============================================================
    PROJECTS — an archive of terminal modules. A collapsed card is a
@@ -1709,11 +1854,25 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .xp__dates { flex-basis: 100%; } /* date onto its own line under the company */
   .xp__meta { margin-top: 12px; }
   .xp__preview { font-size: 12px; }
-  .xp__sec { padding-inline: 16px; }
-  .xp__sec:first-child { padding-top: 18px; }
-  .xp__sec:last-child { padding-bottom: 18px; }
-  .xp__sec + .xp__sec { margin-top: 22px; }
+  .xp__body { padding: 14px 16px 18px; }
+  /* four commands never squeeze into one phone-width row — they scroll,
+     full size, and the row bleeds to the card edge so the cut-off tab
+     reads as "there is more this way" */
+  .xp__tabs {
+    flex-wrap: nowrap;
+    gap: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+  .xp__tabs::-webkit-scrollbar { display: none; }
+  .xp__tab { flex: 0 0 auto; }
   .xp__bullet { font-size: 13px; }
+  .xpo { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .xps__grp { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .xps__label { line-height: 1.6; }
   .xpp { padding: 12px 14px; }
   .xpp__idx { position: static; display: block; margin-bottom: 2px; }
 
@@ -1786,9 +1945,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   /* skills: the wall stays lit and still — no power-up, no flicker.
      Hover / focus / tap still reveals each sign's name, instantly. */
   .sign__icon, .sign__name, .stack__panel::after, .xs__item { animation: none !important; }
-  /* experience + projects: cards open and close with no height animation */
+  /* experience + projects: cards open and close with no height animation,
+     and a tab's content is simply there — no fade, no slide */
   .xp__panel, .xp.is-open .xp__panel,
   .pcard__panel, .pcard.is-open .pcard__panel { transition: none !important; }
+  /* the selected panel is simply there — the blanket transition rule below
+     already removes the fade, so only the offset needs undoing */
+  .xp__tp[hidden] { transform: none; }
   .wall__signs { overflow: visible; -webkit-mask-image: none; mask-image: none; }
   .wall__track { animation: none !important; flex-wrap: wrap; width: auto; gap: var(--sign-gap); }
   .wall__set { display: contents; }

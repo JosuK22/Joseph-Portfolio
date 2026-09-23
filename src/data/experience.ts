@@ -8,20 +8,37 @@ export interface ExperienceProject {
   tech?: string[];
 }
 
+/** A slice of `stack`, grouped so the stack tab reads as a shape rather than a
+ *  list. Grouping only sorts technologies that are already on record — it never
+ *  adds one. */
+export interface StackGroup {
+  /** Short, lowercase: frontend, testing, infrastructure, ... */
+  label: string;
+  items: string[];
+}
+
 export interface Job {
   role: string;
   company: string;
   dates: string;
+  /** Where the work happened, as the role/company line already stated it. */
+  location: string;
+  /** 'current' only while `dates` runs to Present. */
+  status: 'current' | 'completed';
   /** Short descriptor for the collapsed card, taken from the role title —
    *  or, where the title is generic, from the bullets themselves. */
   category: string;
+  /** One sentence for the overview tab. A compression of the bullets below —
+   *  same rule as `name` and `category`, so it names only work on record. */
+  overview: string;
   /** Set only where the bullets enumerate discrete, countable projects.
    *  Omitted when a single bullet covers an open-ended number of them. */
   projectCount?: number;
   /** 3–5 headline technologies for the collapsed card; a subset of `stack`. */
   stackPreview: string[];
-  /** Every technology named in this job's bullets — nothing assumed. */
-  stack: string[];
+  /** Every technology named in this job's bullets — nothing assumed — sorted
+   *  into groups. */
+  stack: StackGroup[];
   responsibilities: string[];
   projects: ExperienceProject[];
   /** Explicit, stated results only. Empty where the bullets state none. */
@@ -29,29 +46,28 @@ export interface Job {
 }
 
 /* Every `description`, `responsibilities` and `outcomes` string below is an
-   original bullet, word for word — the redesign only decides which section a
-   bullet belongs in. `name`, `category`, `stack` and `projectCount` are drawn
-   from those same sentences. */
+   original bullet, word for word — the redesign only decides which tab a
+   bullet belongs in. `name`, `category`, `overview`, `location`, `status`,
+   `stack` and `projectCount` are drawn from those same sentences. */
 export const jobs: Job[] = [
   {
-    role: 'Frontend Developer (Remote)',
+    role: 'Frontend Developer',
     company: 'Beyondz / Venture Way',
     dates: 'Jul 2025 – Present',
+    location: 'Remote',
+    status: 'current',
     category: 'frontend',
+    overview:
+      'Frontend work across a multi-brand startup studio — production marketing and corporate sites, an in-house headless CMS console, and interactive 3D and AI-chat features, all on a shared component library and CI/CD pipeline.',
     // no count: one bullet covers "8+" sites, so any total would be a guess
     stackPreview: ['Astro', 'React', 'Next.js', 'Three.js'],
     stack: [
-      'Astro',
-      'React',
-      'MUI',
-      'Next.js',
-      'Supabase',
-      'Three.js',
-      'react-three-fiber',
-      'Playwright',
-      'Azure Static Web Apps',
-      'REST APIs',
-      'CI/CD',
+      { label: 'frontend', items: ['Astro', 'React', 'Next.js'] },
+      { label: '3d / graphics', items: ['Three.js', 'react-three-fiber'] },
+      { label: 'styling', items: ['MUI'] },
+      { label: 'backend / data', items: ['Supabase', 'REST APIs'] },
+      { label: 'testing', items: ['Playwright'] },
+      { label: 'infrastructure', items: ['Azure Static Web Apps', 'CI/CD'] },
     ],
     responsibilities: [
       'Build complex, responsive layouts in Astro using design tokens, reusable layouts, and a scoped component architecture to keep a large UI consistent and maintainable.',
@@ -80,13 +96,21 @@ export const jobs: Job[] = [
     outcomes: [],
   },
   {
-    role: 'Freelance Developer (Remote)',
+    role: 'Freelance Developer',
     company: 'Self-employed',
     dates: 'Oct 2024 – Jul 2025',
+    location: 'Remote',
+    status: 'completed',
     category: 'full stack',
+    overview:
+      'Client work delivered end to end — a full-stack management application, an IoT dashboard UI, and a responsive startup marketing website — each built from scratch against accessibility and design-system guidelines.',
     projectCount: 3,
     stackPreview: ['React.js', 'Wix Studio', 'CSS'],
-    stack: ['React.js', 'Wix Studio', 'CSS'],
+    stack: [
+      { label: 'frontend', items: ['React.js'] },
+      { label: 'styling', items: ['CSS'] },
+      { label: 'platform', items: ['Wix Studio'] },
+    ],
     responsibilities: [
       'Delivered complete product UI/UX from scratch, following accessibility and design-system guidelines.',
     ],
@@ -111,13 +135,21 @@ export const jobs: Job[] = [
     outcomes: [],
   },
   {
-    role: 'Full Stack Developer Intern (Remote)',
+    role: 'Full Stack Developer Intern',
     company: 'Cuvette Tech',
     dates: 'Jan 2024 – Jul 2024',
+    location: 'Remote',
+    status: 'completed',
     category: 'full stack',
+    overview:
+      'Full-stack internship building two MERN applications end to end — a quiz builder implemented from Figma designs, and a task manager with JWT authentication and secure REST endpoints.',
     projectCount: 2,
     stackPreview: ['MERN', 'JWT', 'REST APIs', 'Figma'],
-    stack: ['MERN', 'JWT', 'REST APIs', 'Figma'],
+    stack: [
+      { label: 'stack', items: ['MERN'] },
+      { label: 'api / auth', items: ['JWT', 'REST APIs'] },
+      { label: 'design', items: ['Figma'] },
+    ],
     responsibilities: [],
     projects: [
       {
@@ -137,12 +169,19 @@ export const jobs: Job[] = [
   },
   {
     role: 'Associate Developer L1',
-    company: 'Publicis Sapient, Bangalore',
+    company: 'Publicis Sapient',
     dates: 'Feb 2022 – Dec 2022',
+    location: 'Bangalore',
+    status: 'completed',
     category: 'frontend',
+    overview:
+      'Front-end delivery on enterprise client products — a high-traffic Salesforce Commerce Cloud storefront and a hotel-management system — inside Agile teams holding to web-performance standards.',
     projectCount: 2,
     stackPreview: ['Salesforce Commerce Cloud', 'Agile'],
-    stack: ['Salesforce Commerce Cloud (SFCC)', 'Agile'],
+    stack: [
+      { label: 'platform', items: ['Salesforce Commerce Cloud (SFCC)'] },
+      { label: 'practice', items: ['Agile'] },
+    ],
     responsibilities: [
       'Collaborated in Agile teams, conducted code reviews, and upheld web-performance standards.',
     ],

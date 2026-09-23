@@ -2,6 +2,19 @@
 import { jobs } from '../data/experience';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+type TabId = 'overview' | 'responsibilities' | 'projects' | 'stack';
+
+/* Tabs are built from what a job actually has on record. Overview and
+   projects are always offered — projects carries its own empty state — while
+   responsibilities and stack only appear when there is something in them. */
+const tabsFor = (job: (typeof jobs)[number]): TabId[] => {
+  const tabs: TabId[] = ['overview'];
+  if (job.responsibilities.length > 0) tabs.push('responsibilities');
+  tabs.push('projects');
+  if (job.stack.length > 0) tabs.push('stack');
+  return tabs;
+};
 ---
 
 <section class="section shell" id="experience">
@@ -10,96 +23,166 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     <div class="xp-list">
       {
-        jobs.map((job, i) => (
-          <article class="xp" data-xp>
-            {/* the whole collapsed card is the trigger — one real button, so
-                Enter/Space and focus come for free */}
-            <h3 class="xp__h">
-              <button
-                class="xp__head"
-                type="button"
-                id={`xp-${i}-btn`}
-                aria-expanded="false"
-                aria-controls={`xp-${i}-panel`}
-              >
-                <span class="xp__idx" aria-hidden="true">{pad(i + 1)} //</span>
-                <span class="xp__top">
-                  <span class="xp__company">{job.company}</span>
-                  <span class="xp__dates">{job.dates}</span>
-                </span>
-                <span class="xp__role">{job.role}</span>
-                <span class="xp__meta">
-                  <span class="xp__cat">{job.category}</span>
-                  {job.projectCount !== undefined && (
-                    <span class="xp__count">{pad(job.projectCount)} projects</span>
-                  )}
-                </span>
-                <span class="xp__preview">{job.stackPreview.join(' · ')}</span>
-                <span class="xp__cta" aria-hidden="true">
-                  <span class="xp__cta-open">
-                    <span class="xp__chev" />
-                    view details
+        jobs.map((job, i) => {
+          const tabs = tabsFor(job);
+          return (
+            <article class="xp" data-xp>
+              {/* the whole collapsed card is the trigger — one real button, so
+                  Enter/Space and focus come for free */}
+              <h3 class="xp__h">
+                <button
+                  class="xp__head"
+                  type="button"
+                  id={`xp-${i}-btn`}
+                  aria-expanded="false"
+                  aria-controls={`xp-${i}-panel`}
+                >
+                  <span class="xp__idx" aria-hidden="true">{pad(i + 1)} //</span>
+                  <span class="xp__top">
+                    <span class="xp__company">{job.company}</span>
+                    <span class="xp__dates">{job.dates}</span>
                   </span>
-                  <span class="xp__cta-close">− collapse</span>
-                </span>
-              </button>
-            </h3>
+                  <span class="xp__rolerow">
+                    <span class="xp__role">{job.role}</span>
+                    {job.status === 'current' && <span class="xp__status">current</span>}
+                  </span>
+                  <span class="xp__meta">
+                    <span class="xp__tag">{job.category}</span>
+                    <span class="xp__tag">{job.location}</span>
+                    {job.projectCount !== undefined && (
+                      <span class="xp__tag">{pad(job.projectCount)} projects</span>
+                    )}
+                  </span>
+                  <span class="xp__preview">{job.stackPreview.join(' · ')}</span>
+                  <span class="xp__cta" aria-hidden="true">
+                    <span class="xp__cta-open">
+                      <span class="xp__chev" />
+                      view details
+                    </span>
+                    <span class="xp__cta-close">− collapse</span>
+                  </span>
+                </button>
+              </h3>
 
-            <div class="xp__panel" id={`xp-${i}-panel`} role="region" aria-labelledby={`xp-${i}-btn`}>
-              <div class="xp__inner">
-                {job.responsibilities.length > 0 && (
-                  <section class="xp__sec">
-                    <h4 class="xp__label">responsibilities</h4>
-                    <ul class="xp__bullets">
-                      {job.responsibilities.map((b) => (
-                        <li class="xp__bullet">{b}</li>
+              <div class="xp__panel" id={`xp-${i}-panel`} role="region" aria-labelledby={`xp-${i}-btn`}>
+                <div class="xp__inner">
+                  <div class="xp__body">
+                    {/* real tabs: ←/→, Home/End and the selected state all come
+                        from the pattern rather than being reinvented */}
+                    <div class="xp__tabs" role="tablist" aria-label={`${job.company} details`} data-xptabs>
+                      {tabs.map((tab, ti) => (
+                        <button
+                          class="xp__tab"
+                          type="button"
+                          role="tab"
+                          id={`xp-${i}-tab-${tab}`}
+                          aria-controls={`xp-${i}-tp-${tab}`}
+                          aria-selected={ti === 0 ? 'true' : 'false'}
+                          tabindex={ti === 0 ? undefined : -1}
+                          data-xptab={tab}
+                        >
+                          <span class="xp__tab-sigil" aria-hidden="true">./</span>
+                          <span class="xp__tab-name">{tab}</span>
+                        </button>
                       ))}
-                    </ul>
-                  </section>
-                )}
+                    </div>
 
-                {job.projects.length > 0 && (
-                  <section class="xp__sec">
-                    <h4 class="xp__label">
-                      projects
-                      {job.projectCount !== undefined && (
-                        <span class="xp__label-n"> // {pad(job.projectCount)}</span>
-                      )}
-                    </h4>
-                    <ol class="xp__projects">
-                      {job.projects.map((p, pi) => (
-                        <li class="xpp">
-                          <span class="xpp__idx" aria-hidden="true">{pad(pi + 1)}</span>
-                          <h5 class="xpp__name">{p.name}</h5>
-                          <p class="xpp__desc">{p.description}</p>
-                          {p.tech && p.tech.length > 0 && <p class="xpp__tech">{p.tech.join(' · ')}</p>}
-                        </li>
-                      ))}
-                    </ol>
-                  </section>
-                )}
+                    {tabs.map((tab, ti) => (
+                      <div
+                        class="xp__tp"
+                        id={`xp-${i}-tp-${tab}`}
+                        role="tabpanel"
+                        aria-labelledby={`xp-${i}-tab-${tab}`}
+                        tabindex="0"
+                        data-xptp={tab}
+                        hidden={ti === 0 ? undefined : true}
+                      >
+                        {tab === 'overview' && (
+                          <>
+                            <dl class="xpo">
+                              <div class="xpo__row">
+                                <dt class="xpo__k">role</dt>
+                                <dd class="xpo__v">{job.role}</dd>
+                              </div>
+                              <div class="xpo__row">
+                                <dt class="xpo__k">company</dt>
+                                <dd class="xpo__v">{job.company}</dd>
+                              </div>
+                              <div class="xpo__row">
+                                <dt class="xpo__k">period</dt>
+                                <dd class="xpo__v">{job.dates}</dd>
+                              </div>
+                              <div class="xpo__row">
+                                <dt class="xpo__k">location</dt>
+                                <dd class="xpo__v">{job.location}</dd>
+                              </div>
+                              <div class="xpo__row">
+                                <dt class="xpo__k">focus</dt>
+                                <dd class="xpo__v">{job.category}</dd>
+                              </div>
+                            </dl>
 
-                {job.stack.length > 0 && (
-                  <section class="xp__sec">
-                    <h4 class="xp__label">stack</h4>
-                    <p class="xp__stack">{job.stack.join(' · ')}</p>
-                  </section>
-                )}
+                            <p class="xp__summary">{job.overview}</p>
 
-                {job.outcomes.length > 0 && (
-                  <section class="xp__sec">
-                    <h4 class="xp__label">outcomes</h4>
-                    <ul class="xp__bullets">
-                      {job.outcomes.map((o) => (
-                        <li class="xp__bullet">{o}</li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
+                            {job.outcomes.length > 0 && (
+                              <section class="xp__sub">
+                                <h4 class="xp__label">highlights</h4>
+                                <ul class="xp__bullets">
+                                  {job.outcomes.map((o) => (
+                                    <li class="xp__bullet">{o}</li>
+                                  ))}
+                                </ul>
+                              </section>
+                            )}
+                          </>
+                        )}
+
+                        {tab === 'responsibilities' && (
+                          <ul class="xp__bullets">
+                            {job.responsibilities.map((b) => (
+                              <li class="xp__bullet">{b}</li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {tab === 'projects' &&
+                          (job.projects.length > 0 ? (
+                            <ol class="xp__projects">
+                              {job.projects.map((p, pi) => (
+                                <li class="xpp">
+                                  <span class="xpp__idx" aria-hidden="true">{pad(pi + 1)}</span>
+                                  <h5 class="xpp__name">{p.name}</h5>
+                                  <p class="xpp__desc">{p.description}</p>
+                                  {p.tech && p.tech.length > 0 && <p class="xpp__tech">{p.tech.join(' · ')}</p>}
+                                </li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p class="xp__empty">no project data on record</p>
+                          ))}
+
+                        {tab === 'stack' && (
+                          <div class="xps">
+                            {job.stack.map((group) => (
+                              <div class="xps__grp">
+                                <h5 class="xps__label">{group.label}</h5>
+                                <ul class="xps__items">
+                                  {group.items.map((item) => (
+                                    <li class="xps__item">{item}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </article>
-        ))
+            </article>
+          );
+        })
       }
     </div>
   </div>
@@ -110,11 +193,66 @@ const pad = (n: number) => String(n).padStart(2, '0');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   // must match the panel transition in global.css
   const OPEN_MS = 320;
+  /** Per card: put its tabs back on the overview. Filled as the cards are
+   *  wired below, and only ever called from a click, so it is complete by
+   *  the time anything reads it. */
+  const resets = new Map<HTMLElement, () => void>();
 
   cards.forEach((card) => {
-    const btn = card.querySelector('button');
+    const btn = card.querySelector<HTMLButtonElement>('.xp__head');
     if (!btn) return;
 
+    // ---- the record's tabs -------------------------------------------
+    const tabs = Array.from(card.querySelectorAll<HTMLButtonElement>('[data-xptab]'));
+    const panels = Array.from(card.querySelectorAll<HTMLElement>('[data-xptp]'));
+
+    const select = (tab: HTMLButtonElement, focus: boolean) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.xptp !== tab.dataset.xptab;
+      });
+      // On a phone the row of commands scrolls, so the selected one can sit
+      // past the edge — pull it back into the row (and only the row: this
+      // never moves the page).
+      const row = tab.parentElement;
+      // clientWidth is 0 while the record is collapsed — nothing to centre yet
+      if (row && row.clientWidth > 0 && row.scrollWidth > row.clientWidth) {
+        const offset = tab.getBoundingClientRect().left - row.getBoundingClientRect().left;
+        row.scrollTo({
+          left: Math.max(0, row.scrollLeft + offset - (row.clientWidth - tab.offsetWidth) / 2),
+          behavior: reduceMotion.matches ? 'auto' : 'smooth',
+        });
+      }
+      // Only keyboard navigation moves focus; a click already has it.
+      if (focus) tab.focus();
+    };
+
+    if (tabs[0]) resets.set(card, () => select(tabs[0], false));
+
+    tabs.forEach((tab, ti) => {
+      tab.addEventListener('click', () => select(tab, false));
+      tab.addEventListener('keydown', (e) => {
+        const next =
+          e.key === 'ArrowRight' || e.key === 'ArrowDown'
+            ? tabs[(ti + 1) % tabs.length]
+            : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+              ? tabs[(ti - 1 + tabs.length) % tabs.length]
+              : e.key === 'Home'
+                ? tabs[0]
+                : e.key === 'End'
+                  ? tabs[tabs.length - 1]
+                  : null;
+        if (!next) return;
+        e.preventDefault();
+        select(next, true);
+      });
+    });
+
+    // ---- one open record at a time -----------------------------------
     btn.addEventListener('click', () => {
       const opening = btn.getAttribute('aria-expanded') !== 'true';
 
@@ -125,10 +263,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
       cards.forEach((other) => {
         // single-open: the rest close
-        const otherBtn = other.querySelector('button');
+        const otherBtn = other.querySelector<HTMLButtonElement>('.xp__head');
         const on = other === card && opening;
         other.classList.toggle('is-open', on);
         otherBtn?.setAttribute('aria-expanded', String(on));
+        // every record opens on its overview — the tab a visitor left behind
+        // on some other card is never the answer to "what was this job?"
+        resets.get(other)?.();
       });
 
       if (reduceMotion.matches) {
