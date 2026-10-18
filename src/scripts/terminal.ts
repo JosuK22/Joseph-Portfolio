@@ -35,7 +35,7 @@ const FILES: Record<string, string[]> = {
   ],
   'contact.txt': [
     'email     josephkanoj@gmail.com',
-    'whatsapp  +91 97447 88125',
+    'whatsapp  type `whatsapp` to open a chat',
     'github    github.com/JosuK22',
     'linkedin  linkedin.com/in/joseph-k-anoj',
   ],
