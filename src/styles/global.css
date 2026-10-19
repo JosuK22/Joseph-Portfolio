@@ -1189,7 +1189,10 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .pcard--featured.is-open { box-shadow: 0 0 22px rgba(0, 255, 65, 0.1); }
 .pcard--featured .pcard__name { color: var(--accent); }
 .pcard__flag {
-  margin-left: auto;
+  margin-left: 4px;
+  border: 1px solid var(--border-lit);
+  border-radius: 2px;
+  padding: 1px 6px;
   font-size: 10px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
@@ -1197,14 +1200,39 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   text-shadow: 0 0 7px rgba(0, 255, 65, 0.35);
   white-space: nowrap;
 }
-.pcard__bar { border-radius: 2px 2px 0 0; }
+.pcard__bar { border-radius: 2px 2px 0 0; padding-block: 8px; min-height: 40px; }
+
+/* live / code shortcuts, right-aligned in the title bar */
+.pcard__quick { margin-left: auto; display: flex; gap: 6px; }
+.pcard__quick a {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--link);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 2px 8px;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.pcard__quick .arrow { display: inline-block; transition: transform 0.18s ease; }
+.pcard__quick a:hover, .pcard__quick a:focus-visible { color: var(--link-hover); border-color: var(--border-lit); }
+.pcard__quick a:hover .arrow, .pcard__quick a:focus-visible .arrow { transform: translate(2px, -2px); }
 
 /* ---- collapsed state: the whole thing is the button ---- */
 .pcard__h { margin: 0; font-weight: 400; }
+/* index | name ............ status
+         | tagline
+         | type  [tag] [tag]  view details */
 .pcard__head {
-  display: block;
+  display: grid;
+  grid-template-columns: 2.4em minmax(0, 1fr) auto;
+  grid-template-areas:
+    'idx name    state'
+    '.   tagline tagline'
+    '.   meta    cta';
+  column-gap: 14px;
+  align-items: center;
   width: 100%;
-  padding: 18px 20px;
+  padding: 16px 20px 15px;
   background: none;
   border: 0;
   color: var(--text);
@@ -1213,20 +1241,16 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   text-align: left;
 }
 .pcard__idx {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  opacity: 0.7;
-  margin-bottom: 5px;
+  grid-area: idx;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--border-lit);
+  transition: color 0.2s ease;
 }
-.pcard__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 6px 20px;
-  flex-wrap: wrap;
-}
+.pcard:hover .pcard__idx, .pcard.is-open .pcard__idx { color: var(--muted); }
 .pcard__name {
+  grid-area: name;
   font-family: var(--font-display);
   font-size: 26px;
   line-height: 1.05;
@@ -1239,8 +1263,10 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   text-shadow: 0 0 9px rgba(0, 255, 65, 0.35);
 }
 .pcard__state {
+  grid-area: state;
+  justify-self: end;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   font-size: 11px;
   letter-spacing: 1.2px;
@@ -1249,57 +1275,74 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   white-space: nowrap;
 }
 .pcard__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 2px 7px;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  padding: 2px 8px;
+  color: var(--text);
+  transition: border-color 0.2s ease;
 }
-.pcard:hover .pcard__status { border-color: var(--border-lit); color: var(--text); }
+.pcard__status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.pcard__status[data-state='live']::before { background: var(--accent); box-shadow: 0 0 6px rgba(0, 255, 65, 0.7); }
+.pcard__status[data-state='wip']::before { background: var(--link); box-shadow: 0 0 6px rgba(255, 176, 0, 0.6); }
+.pcard:hover .pcard__status { border-color: var(--border-lit); }
 .pcard__year { opacity: 0.75; }
 
 .pcard__tagline {
-  display: block;
-  margin-top: 5px;
+  grid-area: tagline;
+  margin-top: 4px;
   font-size: 14px;
   color: var(--text);
-  transition: color 0.18s ease;
+  opacity: 0.9;
+  transition: color 0.18s ease, opacity 0.18s ease;
 }
-.pcard:hover .pcard__tagline { color: var(--accent); }
+.pcard:hover .pcard__tagline { color: var(--accent); opacity: 1; }
 
-/* category · type */
+/* type, then each headline technology as a chip */
 .pcard__meta {
+  grid-area: meta;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-top: 13px;
+  gap: 6px;
+  margin-top: 11px;
+}
+.pcard__type {
+  margin-right: 6px;
   font-size: 11px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
   color: var(--muted);
 }
-.pcard__type::before {
-  content: '·';
-  margin-right: 10px;
-  color: var(--border-lit);
-}
-.pcard__tags {
-  display: block;
-  margin-top: 7px;
-  font-size: 13px;
+.pcard__tag {
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--text);
-  opacity: 0.85;
-  transition: opacity 0.18s ease;
+  background: rgba(30, 58, 38, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 1px 7px;
+  transition: border-color 0.18s ease;
 }
-.pcard:hover .pcard__tags { opacity: 1; }
+.pcard:hover .pcard__tag { border-color: var(--border-lit); }
 
 /* ---- expand control ---- */
 .pcard__cta {
-  display: block;
-  margin-top: 15px;
+  grid-area: cta;
+  align-self: end;
+  justify-self: end;
+  margin-top: 11px;
   font-size: 13px;
   color: var(--muted);
-  text-align: right;
+  white-space: nowrap;
   transition: color 0.18s ease;
 }
 .pcard__head:hover .pcard__cta,
@@ -1955,15 +1998,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
   .pnav { margin: 20px 0 18px; gap: 8px; }
   .pnav__tab { padding: 8px 10px; font-size: 11px; letter-spacing: 1.1px; }
-  .pcard__bar { flex-wrap: wrap; row-gap: 4px; }
-  .pcard__flag { margin-left: 0; flex-basis: 100%; }
-  .pcard__head { padding: 16px 14px; }
-  .pcard__top { gap: 2px; }
+  .pcard__bar { padding-inline: 12px; }
+  .pcard__flag { display: none; } /* the brighter frame already marks it */
+  /* one column: status drops under the name, view details under the tags */
+  .pcard__head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'name' 'state' 'tagline' 'meta' 'cta';
+    padding: 14px 14px 13px;
+  }
+  .pcard__idx { display: none; }
   .pcard__name { font-size: 22px; }
-  .pcard__state { flex-basis: 100%; } /* status onto its own line under the name */
-  .pcard__tagline { font-size: 13px; }
-  .pcard__meta { margin-top: 11px; }
-  .pcard__tags { font-size: 12px; }
+  .pcard__state { justify-self: start; margin-top: 7px; }
+  .pcard__tagline { font-size: 13px; margin-top: 7px; }
+  .pcard__meta { margin-top: 10px; }
+  .pcard__tag { font-size: 11px; }
+  .pcard__cta { margin-top: 8px; }
   .pcard__sec { padding-inline: 14px; }
   .pcard__sec:first-child { padding-top: 16px; }
   .pcard__sec:last-child { padding-bottom: 16px; }
@@ -2044,7 +2093,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   *, *::before, *::after { transition: none !important; }
   .btn:hover, .nav__icon:hover,
   .btn--send:hover:not(:disabled),
-  .pcard__link:hover .arrow,
+  .pcard__link:hover .arrow, .pcard__quick a:hover .arrow,
   .clink:hover, .clink:focus-visible, .clink:hover .clink__arrow,
   .nav__mobile a:hover { transform: none; }
   .contact__pulse::after { animation: none; display: none; }
