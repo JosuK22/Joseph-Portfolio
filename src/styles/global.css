@@ -1372,11 +1372,25 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   visibility: visible;
   transition: grid-template-rows 0.32s ease;
 }
-.pcard__inner { overflow: hidden; min-height: 0; }
-.pcard__sec { padding: 0 20px; }
-.pcard__sec:first-child { border-top: 1px solid var(--border); padding-top: 20px; }
-.pcard__sec:last-child { padding-bottom: 22px; }
-.pcard__sec + .pcard__sec { margin-top: 24px; }
+/* clip, not hidden: hidden would make this a scroll container and stop the
+   sidebar below from sticking to the viewport */
+.pcard__inner { overflow: hidden; overflow: clip; min-height: 0; }
+
+/* write-up on the left, facts on the right */
+.pcard__detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  align-items: start;
+  border-top: 1px solid var(--border);
+}
+.pcard__main { align-self: stretch; padding: 22px 28px 26px 20px; border-right: 1px solid var(--border); }
+.pcard__main .pcard__body, .pcard__main .pcard__bullets { max-width: 78ch; }
+.pcard__aside {
+  position: sticky;
+  top: calc(var(--nav-h) + 12px);
+  padding: 22px 20px 24px;
+}
+.pcard__sec + .pcard__sec { margin-top: 26px; }
 
 .pcard__label {
   display: flex;
@@ -1397,60 +1411,103 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   background: var(--border);
 }
 
-.pcard__body { font-size: 14px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
+.pcard__body { font-size: 14px; line-height: 1.75; color: var(--text); text-wrap: pretty; }
 .pcard__sub {
-  margin-top: 16px;
-  margin-bottom: 6px;
-  font-size: 11px;
+  margin-bottom: 4px;
+  font-size: 10px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--link);
 }
-.pcard__next { border-left: 1px solid var(--border); padding-left: 14px; margin-top: 4px; }
-
-/* a real command, printed like one */
-.pcard__cmd {
+.pcard__note { font-size: 13px; line-height: 1.6; color: var(--text); text-wrap: pretty; }
+.pcard__aside .pcard__status { display: inline-flex; margin-bottom: 10px; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; }
+.pcard__next {
   margin-top: 12px;
   padding: 9px 12px;
-  background: rgba(10, 14, 10, 0.55);
+  border: 1px dashed rgba(255, 176, 0, 0.35);
+  border-radius: 2px;
+  background: rgba(255, 176, 0, 0.04);
+}
+
+/* a real command, printed like one, with a copy button */
+.pcard__cmd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 8px 8px 8px 14px;
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 2px;
+}
+.pcard__cmd code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
   font-size: 13px;
   color: var(--text);
   overflow-wrap: anywhere;
 }
 .pcard__cmd-sigil { color: var(--accent); }
+.pcard__copy {
+  flex: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--link);
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.pcard__copy:hover, .pcard__copy:focus-visible { color: var(--link-hover); border-color: var(--border-lit); }
 
-.pcard__bullets { display: flex; flex-direction: column; gap: 8px; }
+.pcard__bullets { display: flex; flex-direction: column; gap: 10px; }
 .pcard__bullet {
   position: relative;
-  padding-left: 20px;
+  padding-left: 22px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text);
   text-wrap: pretty;
 }
 .pcard__bullet::before {
   content: '›';
   position: absolute;
-  left: 0;
-  color: var(--muted);
+  left: 2px;
+  color: var(--accent);
+  opacity: 0.7;
 }
 
-.pcard__stack { font-size: 13px; line-height: 1.7; color: var(--text); text-wrap: pretty; }
+.pcard__chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.pcard__links { display: flex; flex-wrap: wrap; gap: 8px; }
+.pcard__links { display: flex; flex-direction: column; gap: 8px; }
 .pcard__link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 7px 13px;
+  padding: 8px 13px;
   font-size: 13px;
   color: var(--link);
-  transition: color 0.18s ease, border-color 0.18s ease;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
+.pcard__link--primary { background: var(--link); border-color: var(--link); color: var(--bg); font-weight: 700; }
 .pcard__link .arrow { display: inline-block; transition: transform 0.18s ease; }
 .pcard__link:hover, .pcard__link:focus-visible { color: var(--link-hover); border-color: var(--border-lit); }
+.pcard__link--primary:hover, .pcard__link--primary:focus-visible { background: var(--link-hover); border-color: var(--link-hover); color: var(--bg); }
 .pcard__link:hover .arrow, .pcard__link:focus-visible .arrow { transform: translate(2px, -2px); }
+
+/* too narrow for a sidebar: the facts drop below the write-up, and links
+   sit side by side again */
+@media (max-width: 880px) {
+  .pcard__detail { grid-template-columns: minmax(0, 1fr); }
+  .pcard__main { border-right: 0; }
+  .pcard__aside { position: static; border-top: 1px solid var(--border); }
+  .pcard__links { flex-direction: row; flex-wrap: wrap; }
+  .pcard__link { gap: 10px; }
+}
 
 /* ============================================================
    EDUCATION
@@ -2013,12 +2070,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .pcard__meta { margin-top: 10px; }
   .pcard__tag { font-size: 11px; }
   .pcard__cta { margin-top: 8px; }
-  .pcard__sec { padding-inline: 14px; }
-  .pcard__sec:first-child { padding-top: 16px; }
-  .pcard__sec:last-child { padding-bottom: 16px; }
+  .pcard__main { padding: 16px 14px 18px; }
+  .pcard__aside { padding: 16px 14px 18px; }
   .pcard__sec + .pcard__sec { margin-top: 20px; }
   .pcard__body, .pcard__bullet { font-size: 13px; }
-  .pcard__links { gap: 7px; }
   .pcard__link { padding: 8px 11px; font-size: 12px; }
 
   .edu__degree { font-size: 21px; }
