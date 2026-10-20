@@ -4,6 +4,10 @@ import type { Project } from '../data/projects';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+// Colours the status dot: shipped work reads green, unreleased reads amber.
+const stateOf = (status?: string) =>
+  !status ? undefined : /live|published/i.test(status) ? 'live' : /develop/i.test(status) ? 'wip' : 'other';
+
 const groups: { id: string; label: string; items: Project[] }[] = [
   { id: 'personal', label: 'personal', items: projects.personal },
   { id: 'client', label: 'client', items: projects.client },
@@ -66,7 +70,24 @@ const groups: { id: string; label: string; items: Project[] }[] = [
                   <span class="dot dot--y" aria-hidden="true" />
                   <span class="dot dot--g" aria-hidden="true" />
                   <span class="card__file">{p.file}</span>
-                  {p.featured && <span class="pcard__flag">featured // {p.type}</span>}
+                  {p.featured && <span class="pcard__flag">featured</span>}
+                  {/* Quick links live in the bar, outside the expand button —
+                      a link can't sit inside a <button>. The full set is still
+                      in the expanded "links" section. */}
+                  {(p.live || p.repo) && (
+                    <span class="pcard__quick">
+                      {p.live && (
+                        <a href={p.live} target="_blank" rel="noopener" aria-label={`${p.name} live site`}>
+                          live <span class="arrow" aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                      {p.repo && (
+                        <a href={p.repo} target="_blank" rel="noopener" aria-label={`${p.name} on GitHub`}>
+                          code <span class="arrow" aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                    </span>
+                  )}
                 </div>
 
                 {/* the collapsed card is one real button, so Enter/Space and
@@ -79,22 +100,23 @@ const groups: { id: string; label: string; items: Project[] }[] = [
                     aria-expanded="false"
                     aria-controls={`proj-${group.id}-${i}-panel`}
                   >
-                    <span class="pcard__idx" aria-hidden="true">{pad(i + 1)} //</span>
-                    <span class="pcard__top">
-                      <span class="pcard__name">{p.name}</span>
-                      {(p.status || p.year) && (
-                        <span class="pcard__state">
-                          {p.status && <span class="pcard__status">{p.status}</span>}
-                          {p.year && <span class="pcard__year">{p.year}</span>}
-                        </span>
-                      )}
-                    </span>
+                    <span class="pcard__idx" aria-hidden="true">{pad(i + 1)}</span>
+                    <span class="pcard__name">{p.name}</span>
+                    {(p.status || p.year) && (
+                      <span class="pcard__state">
+                        {p.status && (
+                          <span class="pcard__status" data-state={stateOf(p.status)}>{p.status}</span>
+                        )}
+                        {p.year && <span class="pcard__year">{p.year}</span>}
+                      </span>
+                    )}
                     <span class="pcard__tagline">{p.tagline}</span>
                     <span class="pcard__meta">
-                      <span class="pcard__cat">{group.label}</span>
                       <span class="pcard__type">{p.type}</span>
+                      {p.tags.map((t) => (
+                        <span class="pcard__tag">{t}</span>
+                      ))}
                     </span>
-                    <span class="pcard__tags">{p.tags.join(' · ')}</span>
                     <span class="pcard__cta" aria-hidden="true">
                       <span class="pcard__cta-open">
                         <span class="pcard__chev" />
