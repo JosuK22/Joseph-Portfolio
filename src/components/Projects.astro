@@ -8,6 +8,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const stateOf = (status?: string) =>
   !status ? undefined : /live|published/i.test(status) ? 'live' : /develop/i.test(status) ? 'wip' : 'other';
 
+// In priority order — the first one becomes the solid primary button.
+const links = (p: Project) =>
+  [
+    { label: 'live site', href: p.live },
+    { label: 'GitHub', href: p.repo },
+    { label: 'npm', href: p.npm },
+    { label: 'docs', href: p.docs },
+  ].filter((l): l is { label: string; href: string } => !!l.href);
+
 const groups: { id: string; label: string; items: Project[] }[] = [
   { id: 'personal', label: 'personal', items: projects.personal },
   { id: 'client', label: 'client', items: projects.client },
@@ -135,94 +144,104 @@ const groups: { id: string; label: string; items: Project[] }[] = [
                   aria-labelledby={`proj-${group.id}-${i}-btn`}
                 >
                   <div class="pcard__inner">
-                    <section class="pcard__sec">
-                      <h4 class="pcard__label">overview</h4>
-                      <p class="pcard__body">{p.overview}</p>
-                      {p.command && (
-                        <p class="pcard__cmd">
-                          <span class="pcard__cmd-sigil" aria-hidden="true">$ </span>
-                          {p.command}
-                        </p>
-                      )}
-                    </section>
+                    <div class="pcard__detail">
+                      {/* the write-up, at a readable measure */}
+                      <div class="pcard__main">
+                        <section class="pcard__sec">
+                          <h4 class="pcard__label">overview</h4>
+                          <p class="pcard__body">{p.overview}</p>
+                          {p.command && (
+                            <div class="pcard__cmd">
+                              <code>
+                                <span class="pcard__cmd-sigil" aria-hidden="true">$ </span>
+                                {p.command}
+                              </code>
+                              <button class="pcard__copy" type="button" data-copy={p.command}>
+                                copy
+                              </button>
+                            </div>
+                          )}
+                        </section>
 
-                    {p.context && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">context</h4>
-                        <p class="pcard__body">{p.context}</p>
-                      </section>
-                    )}
-
-                    {p.built && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">what I built</h4>
-                        <p class="pcard__body">{p.built}</p>
-                      </section>
-                    )}
-
-                    {p.features && p.features.length > 0 && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">key features</h4>
-                        <ul class="pcard__bullets">
-                          {p.features.map((f) => (
-                            <li class="pcard__bullet">{f}</li>
-                          ))}
-                        </ul>
-                      </section>
-                    )}
-
-                    {p.architecture && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">architecture</h4>
-                        <p class="pcard__body">{p.architecture}</p>
-                      </section>
-                    )}
-
-                    <section class="pcard__sec">
-                      <h4 class="pcard__label">stack</h4>
-                      <p class="pcard__stack">{(p.stack ?? p.tags).join(' · ')}</p>
-                    </section>
-
-                    {(p.statusNote || p.status) && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">status</h4>
-                        <p class="pcard__body">{p.statusNote ?? p.status}</p>
-                        {p.nextRelease && (
-                          <div class="pcard__next">
-                            <p class="pcard__sub">next release // in development</p>
-                            <p class="pcard__body">{p.nextRelease}</p>
-                          </div>
+                        {p.context && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">context</h4>
+                            <p class="pcard__body">{p.context}</p>
+                          </section>
                         )}
-                      </section>
-                    )}
 
-                    {(p.live || p.repo || p.npm || p.docs) && (
-                      <section class="pcard__sec">
-                        <h4 class="pcard__label">links</h4>
-                        <div class="pcard__links">
-                          {p.live && (
-                            <a class="pcard__link" href={p.live} target="_blank" rel="noopener">
-                              live <span class="arrow">↗</span>
-                            </a>
-                          )}
-                          {p.repo && (
-                            <a class="pcard__link" href={p.repo} target="_blank" rel="noopener">
-                              GitHub <span class="arrow">↗</span>
-                            </a>
-                          )}
-                          {p.npm && (
-                            <a class="pcard__link" href={p.npm} target="_blank" rel="noopener">
-                              npm <span class="arrow">↗</span>
-                            </a>
-                          )}
-                          {p.docs && (
-                            <a class="pcard__link" href={p.docs} target="_blank" rel="noopener">
-                              docs <span class="arrow">↗</span>
-                            </a>
-                          )}
-                        </div>
-                      </section>
-                    )}
+                        {p.built && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">what I built</h4>
+                            <p class="pcard__body">{p.built}</p>
+                          </section>
+                        )}
+
+                        {p.features && p.features.length > 0 && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">key features</h4>
+                            <ul class="pcard__bullets">
+                              {p.features.map((f) => (
+                                <li class="pcard__bullet">{f}</li>
+                              ))}
+                            </ul>
+                          </section>
+                        )}
+
+                        {p.architecture && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">architecture</h4>
+                            <p class="pcard__body">{p.architecture}</p>
+                          </section>
+                        )}
+                      </div>
+
+                      {/* the facts: status, stack, links — sticky beside a long write-up */}
+                      <aside class="pcard__aside">
+                        {(p.statusNote || p.status) && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">status</h4>
+                            {p.status && (
+                              <p class="pcard__status" data-state={stateOf(p.status)}>{p.status}</p>
+                            )}
+                            {p.statusNote && <p class="pcard__note">{p.statusNote}</p>}
+                            {p.nextRelease && (
+                              <div class="pcard__next">
+                                <p class="pcard__sub">next release // in development</p>
+                                <p class="pcard__note">{p.nextRelease}</p>
+                              </div>
+                            )}
+                          </section>
+                        )}
+
+                        <section class="pcard__sec">
+                          <h4 class="pcard__label">stack</h4>
+                          <ul class="pcard__chips">
+                            {(p.stack ?? p.tags).map((t) => (
+                              <li class="pcard__tag">{t}</li>
+                            ))}
+                          </ul>
+                        </section>
+
+                        {links(p).length > 0 && (
+                          <section class="pcard__sec">
+                            <h4 class="pcard__label">links</h4>
+                            <div class="pcard__links">
+                              {links(p).map((l, li) => (
+                                <a
+                                  class={`pcard__link${li === 0 ? ' pcard__link--primary' : ''}`}
+                                  href={l.href}
+                                  target="_blank"
+                                  rel="noopener"
+                                >
+                                  {l.label} <span class="arrow" aria-hidden="true">↗</span>
+                                </a>
+                              ))}
+                            </div>
+                          </section>
+                        )}
+                      </aside>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -291,6 +310,25 @@ const groups: { id: string; label: string; items: Project[] }[] = [
       if (!next) return;
       e.preventDefault();
       select(next, true);
+    });
+  });
+
+  // ---- copy-to-clipboard for a project's command ----------------------
+  document.querySelectorAll<HTMLButtonElement>('.pcard__copy').forEach((btn) => {
+    let timer: number | undefined;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+        btn.textContent = 'copied ✓';
+      } catch {
+        // Clipboard blocked (permissions, insecure origin): select the command
+        // instead so a manual copy is one keystroke away.
+        const code = btn.parentElement?.querySelector('code');
+        if (code) window.getSelection()?.selectAllChildren(code);
+        btn.textContent = 'press ctrl+c';
+      }
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => (btn.textContent = 'copy'), 1800);
     });
   });
 
