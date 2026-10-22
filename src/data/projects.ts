@@ -70,9 +70,9 @@ export const projects: ProjectGroups = {
       name: 'create-clientkit',
       tagline: 'Frontend project scaffolding CLI',
       type: 'developer tool',
-      // the card uppercases this, so no 'v' prefix — it would read 'V1.7.1'
-      status: 'published · 1.7.1',
-      statusNote: 'v1.7.1 is the current release on npm.',
+      // the card uppercases this, so no 'v' prefix — it would read 'V1.8.2'
+      status: 'published · 1.8.2',
+      statusNote: 'v1.8.2 is the current release on npm.',
       year: '2026',
       featured: true,
       tags: ['TypeScript', 'Node.js', 'npm'],
