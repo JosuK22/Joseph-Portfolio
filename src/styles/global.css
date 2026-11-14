@@ -13,6 +13,10 @@
   --accent:     #00FF41; /* headings + the name ONLY */
   --link:       #FFB000; /* links & buttons — amber */
   --link-hover: #FFCE52;
+  /* The whole site is three colours: the black of the tube, phosphor green
+     and amber. Everything else is a shade of one of them — errors and
+     warnings are amber, never red. */
+  --warn:       var(--link);
 
   --font-display: 'VT323', 'Courier New', monospace;
   --font-body:    'Space Mono', 'Courier New', monospace;
@@ -66,6 +70,8 @@ html { scrollbar-width: thin; scrollbar-color: var(--border-lit) var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 ::-webkit-scrollbar-corner { background: var(--bg); }
 
+::selection { background: var(--accent); color: var(--bg); text-shadow: none; }
+
 /* ---------- skip link ---------- */
 .skip-link {
   position: absolute;
@@ -95,6 +101,8 @@ html { scrollbar-width: thin; scrollbar-color: var(--border-lit) var(--bg); }
     rgba(0, 0, 0, 0) 4px
   );
   mix-blend-mode: multiply;
+  /* the tube darkens toward its corners */
+  box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.5);
 }
 
 /* ---------- layout primitives ---------- */
@@ -148,12 +156,12 @@ html { scrollbar-width: thin; scrollbar-color: var(--border-lit) var(--bg); }
 /* ============================================================
    NAV
    ============================================================ */
-header { position: relative; }
+/* The header is what sticks. (The nav itself can't: a sticky element only
+   travels inside its parent, and the header is exactly one nav tall.) */
+header { position: sticky; top: 0; z-index: 100; }
 
 .nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -173,7 +181,7 @@ header { position: relative; }
 .nav__links {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 22px;
   font-size: 13px;
 }
 .nav__link {
@@ -213,9 +221,28 @@ header { position: relative; }
 }
 
 .nav__sep { color: var(--muted); }
-.nav__icons { display: flex; gap: 14px; font-size: 12px; }
-.nav__icon { color: var(--link); transition: color 0.18s ease, transform 0.18s ease; }
-.nav__icon:hover, .nav__icon:focus-visible { color: var(--link-hover); transform: translateY(-2px); }
+/* utilities: resume, the shell, sound — small bordered keys, one family */
+.nav__tools { display: flex; align-items: center; gap: 8px; }
+.nav__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--link);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.nav__tool:hover, .nav__tool:focus-visible { color: var(--link-hover); border-color: var(--link); }
+.nav__tool--solid { border-color: var(--link); }
+.nav__tool--solid:hover, .nav__tool--solid:focus-visible { background: var(--link); color: var(--bg); }
+.nav__tool[aria-pressed='false'] { color: var(--muted); }
 
 .nav__toggle {
   display: none;
@@ -252,15 +279,21 @@ header { position: relative; }
   overflow-y: auto;
 }
 .nav__mobile.open { display: flex; }
-.nav__mobile a {
+.nav__mobile a, .nav__mobile button {
   color: var(--link);
+  font-family: var(--font-body);
   font-size: 14px;
+  line-height: 1.8;
+  text-align: left;
+  background: none;
+  border: 0;
   padding: 10px 2px;
   border-bottom: 1px solid var(--border);
   transition: color 0.18s ease, padding-left 0.18s ease;
 }
-.nav__mobile a:last-child { border-bottom: none; }
-.nav__mobile a:hover { color: var(--link-hover); padding-left: 8px; }
+.nav__mobile > :last-child { border-bottom: none; }
+.nav__mobile a:hover, .nav__mobile button:hover { color: var(--link-hover); padding-left: 8px; }
+.nav__mobile button[aria-pressed='false'] { color: var(--muted); }
 
 /* ============================================================
    HERO
@@ -275,6 +308,7 @@ header { position: relative; }
   min-height: calc(100svh - var(--nav-h));
   display: flex;
   align-items: center;
+  position: relative;
 }
 .hero__grid { width: 100%; }
 
@@ -321,15 +355,17 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .hero__subtitle {
   font-family: var(--font-display);
   font-size: 34px;
+  line-height: 1.15; /* it wraps on a phone — keep the two lines together */
   color: var(--text);
   margin-bottom: 24px;
   letter-spacing: 0.5px;
 }
 .hero__tagline {
-  font-size: 18px;
+  font-size: 17px;
   color: var(--text);
-  line-height: 1.6;
-  max-width: 680px;
+  line-height: 1.65;
+  max-width: 560px;
+  text-wrap: pretty;
 }
 .hero__meta { font-size: 14px; color: var(--muted); margin-top: 18px; }
 .hero__actions {
@@ -339,6 +375,36 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   margin-top: 38px;
   flex-wrap: wrap;
 }
+
+/* profile links under the buttons — quiet, one line */
+.hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 22px;
+  font-size: 13px;
+}
+.hero__links a { color: var(--muted); transition: color 0.18s ease; }
+.hero__links a .arrow { display: inline-block; color: var(--link); transition: transform 0.18s ease; }
+.hero__links a:hover, .hero__links a:focus-visible { color: var(--link-hover); }
+.hero__links a:hover .arrow, .hero__links a:focus-visible .arrow { transform: translate(2px, -2px); }
+
+/* "there is more below" — pinned to the foot of the first screen */
+.hero__cue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  text-align: center;
+  font-size: 12px;
+}
+.hero__cue a { color: var(--muted); transition: color 0.18s ease; }
+.hero__cue a:hover, .hero__cue a:focus-visible { color: var(--link-hover); }
+.hero__cue .arrow { display: inline-block; color: var(--link); animation: cue-bob 1.6s steps(2, end) infinite; }
+@keyframes cue-bob { from { transform: translateY(0); } to { transform: translateY(5px); } }
+/* no room for it on a short or narrow screen — there the content itself
+   already runs to the fold */
+@media (max-height: 700px), (max-width: 1099px) { .hero__cue { display: none; } }
 
 /* ---------- hero art (particle portrait, assembles after boot) ----------
    Visible at every breakpoint: stacked below the text on mobile/tablet,
@@ -359,14 +425,14 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 @media (min-width: 1100px) {
   .hero__grid {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: minmax(0, 1fr) 380px;
     align-items: stretch;
     gap: 36px;
   }
-  .hero__name { font-size: clamp(56px, 6vw, 72px); overflow-wrap: anywhere; }
+  .hero__name { font-size: clamp(64px, 7vw, 100px); overflow-wrap: anywhere; }
   /* grid stretch supplies a real definite height here, so height can go
      back to auto and min-height is enough */
-  .hero__art { height: auto; min-height: 380px; margin-top: 0; }
+  .hero__art { height: auto; min-height: 420px; margin-top: 0; }
 }
 
 /* glow is applied once per frame by the compositor via filter, instead of a
@@ -406,14 +472,66 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 /* ============================================================
    ABOUT
    ============================================================ */
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 40px;
+  align-items: start;
+  margin-top: 22px;
+}
 .about__text {
   font-size: 16px;
   color: var(--text);
   line-height: 1.8;
-  max-width: 860px;
   text-wrap: pretty;
-  margin-top: 22px;
 }
+.about__text + .about__text { margin-top: 16px; }
+
+/* the facts, as a system-info readout */
+.sysinfo {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  transition: border-color 0.2s ease;
+}
+.sysinfo:hover { border-color: var(--border-lit); }
+.sysinfo__bar {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(30, 58, 38, 0.22);
+  font-size: 12px;
+  color: var(--muted);
+}
+.sysinfo__bar .cmd-txt { color: var(--text); }
+.sysinfo__list { margin: 0; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 7px; }
+.sysinfo__row { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 12px; font-size: 13px; line-height: 1.55; }
+.sysinfo__k { color: var(--accent); }
+.sysinfo__v { margin: 0; color: var(--text); }
+
+/* four numbers, each one already stated somewhere on this page */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 30px;
+}
+.stat {
+  padding: 14px 16px 15px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  transition: border-color 0.2s ease;
+}
+.stat:hover { border-color: var(--border-lit); }
+.stat__n {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.35);
+}
+.stat__l { display: block; margin-top: 6px; font-size: 12px; line-height: 1.5; color: var(--muted); }
 
 /* ============================================================
    SKILLS — an illuminated sign wall for the core stack, plus
@@ -502,32 +620,31 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   100% { opacity: 0; background-position: 0 0%; }
 }
 
-.wall { padding: 26px var(--wall-pad) 20px; }
+.wall { padding: 26px var(--wall-pad) 26px; }
 .wall__row + .wall__row { margin-top: 26px; }
 .wall__label { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
-.wall__signs { --sign-gap: 14px; }
+.wall__signs { --sign-gap: 12px; }
 .wall__track { display: flex; flex-wrap: wrap; gap: var(--sign-gap); }
 .wall__set { display: contents; }
 .wall__set--dup { display: none; } /* only the marquee below 1100px uses it */
-.wall__hint { font-size: 12px; color: var(--muted); opacity: 0.75; margin-top: 22px; }
-.wall__hint--tap { display: none; }
-@media (hover: none) {
-  .wall__hint--hover { display: none; }
-  .wall__hint--tap { display: inline; }
-}
 
-/* ---- a single illuminated sign ---- */
+/* ---- a single illuminated sign: the mark, with its name underneath.
+   The name is always on — nobody should have to hover to learn what a
+   logo is — and hover / focus / a pin just turns the whole sign up. ---- */
 .sign {
   --lit: 0.82;
   position: relative;
   display: grid;
-  place-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: center;
+  row-gap: 8px;
   flex: none;
-  width: 96px;
-  height: 84px;
-  padding: 0;
+  width: 108px;
+  height: 104px;
+  padding: 14px 6px 10px;
   background:
-    radial-gradient(58% 58% at 50% 46%, rgba(0, 255, 65, 0.05), rgba(0, 255, 65, 0) 72%),
+    radial-gradient(58% 58% at 50% 40%, rgba(0, 255, 65, 0.05), rgba(0, 255, 65, 0) 72%),
     rgba(10, 14, 10, 0.5);
   border: 1px solid rgba(30, 58, 38, 0.7);
   border-radius: 2px;
@@ -536,9 +653,8 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   transition: border-color 0.22s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 .sign__icon {
-  grid-area: 1 / 1;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   opacity: var(--lit);
   filter: drop-shadow(0 0 7px rgba(0, 255, 65, 0.35));
   transition: opacity 0.26s ease, filter 0.26s ease;
@@ -551,19 +667,15 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   stroke-linecap: square;
   stroke-linejoin: miter;
 }
-/* the name lives in the sign's own space — revealing it never moves anything */
 .sign__name {
-  grid-area: 1 / 1;
   max-width: 100%;
-  padding-inline: 7px;
-  font-size: 13px;
+  min-height: 2.5em; /* two lines reserved, so every mark sits at one height */
+  font-size: 11px;
   line-height: 1.25;
   text-align: center;
-  overflow-wrap: anywhere;
-  color: var(--accent);
-  text-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
-  opacity: 0;
-  transition: opacity 0.26s ease;
+  color: var(--text);
+  opacity: 0.9;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
 /* hover / keyboard focus / pinned by click or tap — all identical */
@@ -572,32 +684,19 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
 .sign.is-named {
   border-color: var(--border-lit);
   background:
-    radial-gradient(70% 70% at 50% 50%, rgba(0, 255, 65, 0.09), rgba(0, 255, 65, 0) 72%),
+    radial-gradient(70% 70% at 50% 40%, rgba(0, 255, 65, 0.1), rgba(0, 255, 65, 0) 72%),
     rgba(10, 14, 10, 0.5);
   box-shadow: 0 0 16px rgba(0, 255, 65, 0.07);
 }
 .sign:hover .sign__icon,
 .sign:focus-visible .sign__icon,
-.sign.is-named .sign__icon { opacity: 0.13; filter: none; }
+.sign.is-named .sign__icon { opacity: 1; filter: drop-shadow(0 0 11px rgba(0, 255, 65, 0.7)); }
 .sign:hover .sign__name,
 .sign:focus-visible .sign__name,
-.sign.is-named .sign__name { opacity: 1; }
-/* the name strikes on like a tube starting */
-.sign:hover .sign__name,
-.sign.is-named .sign__name { animation: name-strike 0.26s steps(1, end); }
-@keyframes name-strike {
-  0% { opacity: 0; }
-  25% { opacity: 1; }
-  40% { opacity: 0.15; }
-  55% { opacity: 1; }
-  70% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
+.sign.is-named .sign__name { color: var(--accent); text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
 
-/* second row: same signage, mounted a little smaller */
-.wall__row--minor .sign { --lit: 0.7; width: 84px; height: 74px; }
-.wall__row--minor .sign__icon { width: 34px; height: 34px; }
-.wall__row--minor .sign__name { font-size: 12px; }
+/* second row: the supporting cast, a touch dimmer */
+.wall__row--minor .sign { --lit: 0.7; }
 
 /* ---- power-up: each sign strikes on in a shuffled order ---- */
 .stack--armed .sign__icon { opacity: 0.05; filter: none; }
@@ -1102,15 +1201,18 @@ html.booted .nav { animation: boot-fade 0.5s ease both; animation-delay: 0.85s; 
   position: absolute;
   inset: -11px -3px;
 }
-.dot--r { background: #3a2a2a; border: 1px solid #5a3a3a; }
-.dot--y { background: #3a3526; border: 1px solid #5a4f2a; }
+/* Three lights in the site's own shades — amber, pale phosphor, full
+   phosphor — rather than a traffic light's red / yellow / green. The class
+   names keep their r / y / g order because secrets.ts keys on them. */
+.dot--r { background: #3a3013; border: 1px solid #5a4a1c; }
+.dot--y { background: #263a2b; border: 1px solid #3f6b4d; }
 .dot--g { background: #1E3A26; border: 1px solid #2f5a3c; }
 
 /* the traffic lights hint at their own secret: every few seconds the
-   project-card dots flare in order — red, then yellow, then green */
+   project-card dots flare in order, left to right */
 .card__bar .dot { animation: dot-cycle 7s ease-in-out infinite; }
-.card__bar .dot--r { --dot-base: #3a2a2a; --dot-border: #5a3a3a; --dot-glow: #ff7a6b; animation-delay: 0s; }
-.card__bar .dot--y { --dot-base: #3a3526; --dot-border: #5a4f2a; --dot-glow: #FFB000; animation-delay: 0.4s; }
+.card__bar .dot--r { --dot-base: #3a3013; --dot-border: #5a4a1c; --dot-glow: #FFB000; animation-delay: 0s; }
+.card__bar .dot--y { --dot-base: #263a2b; --dot-border: #3f6b4d; --dot-glow: #9DFFB0; animation-delay: 0.4s; }
 .card__bar .dot--g { --dot-base: #1E3A26; --dot-border: #2f5a3c; --dot-glow: #00FF41; animation-delay: 0.8s; }
 
 @keyframes dot-cycle {
@@ -1698,7 +1800,7 @@ div:focus-within > .field__label .field__caret { color: var(--link); }
 .btn--send:disabled { opacity: 0.55; cursor: not-allowed; }
 .form__status { font-size: 13px; min-height: 18px; margin-top: -6px; }
 .form__status.ok { color: var(--text); }
-.form__status.err { color: #ff7a6b; }
+.form__status.err { color: var(--warn); }
 
 /* ============================================================
    FOOTER
@@ -1725,6 +1827,8 @@ div:focus-within > .field__label .field__caret { color: var(--link); }
   color: var(--muted);
   text-align: left;
 }
+/* inline-flex drops the prompt's trailing space — keep it */
+.term-open > span:first-child { white-space: pre; }
 .term-open .cmd-txt { color: var(--link); transition: color 0.18s ease; }
 .term-open:hover .cmd-txt, .term-open:focus-visible .cmd-txt { color: var(--link-hover); }
 .term-open__kbd {
@@ -1747,6 +1851,17 @@ div:focus-within > .field__label .field__caret { color: var(--link); }
 @media (pointer: coarse) {
   .term-open__kbd { display: none; }
 }
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 26px;
+  padding-bottom: 20px;
+  font-size: 13px;
+}
+.footer__links a { color: var(--link); transition: color 0.18s ease; }
+.footer__links a:hover, .footer__links a:focus-visible { color: var(--link-hover); }
 
 .footer__copy {
   border-top: 1px solid var(--border);
@@ -1927,7 +2042,7 @@ body.arcade-open { overflow: hidden; }
   overflow-wrap: anywhere;
 }
 .tw__out--muted, .tw__out--echo { color: var(--muted); }
-.tw__out--err { color: #ff7a6b; }
+.tw__out--err { color: var(--warn); }
 .tw__out--accent { color: var(--accent); }
 .tw__line {
   flex: none;
@@ -1974,17 +2089,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
    ============================================================ */
 @media (max-width: 1099px) and (min-width: 721px) {
   .contact-grid { grid-template-columns: 1fr; gap: 30px; }
-  .sign { width: 88px; height: 78px; }
-  .sign__icon { width: 40px; height: 40px; }
-  .wall__row--minor .sign { width: 78px; height: 70px; }
-  .wall__row--minor .sign__icon { width: 32px; height: 32px; }
-  .sign__name { font-size: 12px; }
-  .wall__row--minor .sign__name { font-size: 11px; }
+  .about { grid-template-columns: minmax(0, 1fr); gap: 26px; }
 }
 
-/* the five text links don't fit comfortably below ~880px — hand
-   over to the hamburger earlier than the full mobile layout */
-@media (max-width: 880px) {
+/* six text links plus the three tool keys don't fit comfortably below
+   ~1020px — hand over to the hamburger earlier than the full mobile layout */
+@media (max-width: 1020px) {
   .nav__links { display: none; }
   .nav__toggle { display: block; }
 }
@@ -2007,21 +2117,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .hero__actions .btn { width: 100%; text-align: center; }
   .hero__art { height: 260px; margin-top: 24px; }
 
+  .about { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   .about__text { font-size: 14px; line-height: 1.75; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+  .stat__n { font-size: 38px; }
+  .hero__links { margin-top: 18px; }
 
   .stack { --wall-pad: 14px; }
   .stack__log { font-size: 12px; margin-bottom: 16px; }
-  .wall { padding: 20px var(--wall-pad) 16px; }
+  .wall { padding: 20px var(--wall-pad) 20px; }
   .wall__row + .wall__row { margin-top: 20px; }
   .wall__label { margin-bottom: 11px; }
   .wall__signs { --sign-gap: 10px; }
-  .wall__hint { margin-top: 18px; }
-  .sign { width: 78px; height: 68px; }
-  .sign__icon { width: 34px; height: 34px; }
-  .sign__name { font-size: 11px; padding-inline: 4px; }
-  .wall__row--minor .sign { width: 72px; height: 62px; }
-  .wall__row--minor .sign__icon { width: 28px; height: 28px; }
-  .wall__row--minor .sign__name { font-size: 10px; letter-spacing: -0.2px; }
+  .sign { width: 92px; height: 94px; padding: 12px 4px 8px; row-gap: 6px; }
+  .sign__icon { width: 32px; height: 32px; }
+  .sign__name { font-size: 10px; }
   .xs__btn { gap: 12px; min-height: 52px; padding: 10px 14px; }
   .xs__name { font-size: 21px; }
   .xs__items { padding: 2px 14px 16px; }
@@ -2123,10 +2233,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .cursor { animation: none; }
+  .hero__cue .arrow { animation: none; }
   .card__bar .dot { animation: none; }
   /* skills: the wall stays lit and still — no power-up, no flicker.
-     Hover / focus / tap still reveals each sign's name, instantly. */
-  .sign__icon, .sign__name, .stack__panel::after, .xs__item { animation: none !important; }
+     Every sign's name is printed under it either way. */
+  .sign__icon, .stack__panel::after, .xs__item { animation: none !important; }
   /* experience + projects: cards open and close with no height animation,
      and a tab's content is simply there — no fade, no slide */
   .xp__panel, .xp.is-open .xp__panel,
@@ -2146,7 +2257,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   html.booting .hero ~ *, html.booting footer { visibility: visible; }
   html.booted .hero__stage, html.booted .nav { animation: none; }
   *, *::before, *::after { transition: none !important; }
-  .btn:hover, .nav__icon:hover,
+  .btn:hover,
   .btn--send:hover:not(:disabled),
   .pcard__link:hover .arrow, .pcard__quick a:hover .arrow,
   .clink:hover, .clink:focus-visible, .clink:hover .clink__arrow,

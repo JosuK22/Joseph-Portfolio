@@ -1,15 +1,74 @@
 ---
+import { jobs } from '../data/experience';
+import { projects } from '../data/projects';
+
+// Content rule, same as the data files: nothing here is new information.
+// The copy follows the CV's own summary, the readout is assembled from
+// facts stated elsewhere on the page, and every number below either comes
+// straight from the data or is quoted from it.
+const current = jobs.find((j) => j.status === 'current');
+
+const info: { k: string; v: string }[] = [
+  ...(current ? [{ k: 'role', v: `${current.role} @ ${current.company}` }] : []),
+  { k: 'focus', v: 'React · Next.js · Astro · TypeScript' },
+  { k: 'exp', v: '4+ years, remote-first' },
+  { k: 'degree', v: 'B.Tech, Computer Science Engineering' },
+  { k: 'location', v: 'India' },
+  { k: 'status', v: 'open to remote & relocation' },
+];
+
+const stats: { n: string; label: string }[] = [
+  { n: '4+', label: 'years building production web interfaces' },
+  { n: '8+', label: 'production sites delivered for a startup studio' },
+  { n: String(projects.personal.length + projects.client.length), label: 'personal and client projects on this page' },
+  { n: '104', label: 'stack combinations create-clientkit builds in CI' },
+];
 ---
 
 <section class="section shell" id="about">
   <div class="wrap">
     <h2 class="cmd"><span class="sigil">$</span> cat about</h2>
-    <p class="about__text">
-      Full Stack Developer specializing in frontend engineering, with hands-on experience building
-      complex, responsive web interfaces in React and Astro. Skilled at turning Figma designs into
-      accessible, maintainable UIs, integrating REST APIs, and shipping production websites and CMS
-      frontends end to end. Experience spans enterprise eCommerce (Salesforce Commerce Cloud),
-      startups, and freelance product delivery.
-    </p>
+
+    <div class="about">
+      <div>
+        <p class="about__text">
+          I'm a full stack developer specializing in frontend engineering, with 4+ years building
+          production web interfaces in React, Next.js and Astro — remote-first, with distributed teams
+          throughout. Right now I ship the frontend across a multi-brand startup studio, on a shared
+          component library and CI/CD pipeline.
+        </p>
+        <p class="about__text">
+          I'm strongest at turning Figma designs into accessible, responsive, maintainable UI,
+          integrating REST APIs, and carrying interactive work — 3D, animation, real-time dashboards —
+          from prototype to production. Before this: enterprise eCommerce on Salesforce Commerce Cloud,
+          startups, and freelance product delivery.
+        </p>
+      </div>
+
+      <div class="sysinfo">
+        <p class="sysinfo__bar" aria-hidden="true">~/joseph $ <span class="cmd-txt">neofetch --short</span></p>
+        <dl class="sysinfo__list">
+          {
+            info.map((row) => (
+              <div class="sysinfo__row">
+                <dt class="sysinfo__k">{row.k}</dt>
+                <dd class="sysinfo__v">{row.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+
+    <ul class="stats">
+      {
+        stats.map((s) => (
+          <li class="stat">
+            <span class="stat__n">{s.n}</span>
+            <span class="stat__l">{s.label}</span>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>

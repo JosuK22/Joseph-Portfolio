@@ -135,6 +135,7 @@ const links = [
     const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const { serviceId, templateId, publicKey } = form.dataset;
     const successSound = new Audio('/sounds/submission-success.mp3');
+    successSound.preload = 'none'; // fetched only if a message is actually sent
     successSound.volume = 0.6;
 
     const msgField = form.querySelector('#f-msg') as HTMLTextAreaElement;
@@ -214,8 +215,11 @@ const links = [
         form.reset();
         updateCount();
         setStatus('message sent ✓ — thanks, I’ll be in touch.', 'ok');
-        successSound.currentTime = 0;
-        successSound.play().catch(() => {});
+        // respects the nav's sfx switch (see Base.astro)
+        if (document.documentElement.dataset.sound !== 'off') {
+          successSound.currentTime = 0;
+          successSound.play().catch(() => {});
+        }
       } catch (err) {
         // EmailJS rejects with { status, text }. Without logging it every failure
         // — blocked origin, wrong template variable, exhausted quota — looks the

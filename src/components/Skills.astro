@@ -66,10 +66,6 @@ const SETS = [false, true];
               </div>
             ))
           }
-          <p class="wall__hint" aria-hidden="true">
-            <span class="wall__hint--hover">// hover a sign to identify it</span>
-            <span class="wall__hint--tap">// tap a sign to identify it</span>
-          </p>
         </div>
       </div>
     </div>
@@ -136,9 +132,9 @@ const SETS = [false, true];
     // should light up or flicker.
     const litSigns = () => signs.filter((s) => s.offsetParent !== null);
 
-    // ---- identify a sign: hover and :focus-visible are CSS; a click (or
-    // Enter/Space, or a tap on a touch screen) pins the name on, which also
-    // holds the marquee still so the name can be read ----
+    // ---- highlight a sign: hover and :focus-visible are CSS; a click (or
+    // Enter/Space, or a tap on a touch screen) pins the highlight on, which
+    // also holds the marquee still so the row can be read ----
     const syncPinned = () =>
       stack.classList.toggle('stack--pinned', signs.some((s) => s.classList.contains('is-named')));
     const clearPinned = (except?: HTMLElement) => {

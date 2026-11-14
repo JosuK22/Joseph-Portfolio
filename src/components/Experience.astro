@@ -25,8 +25,11 @@ const tabsFor = (job: (typeof jobs)[number]): TabId[] => {
       {
         jobs.map((job, i) => {
           const tabs = tabsFor(job);
+          // The current role starts open: the first thing a visitor wants
+          // from this section shouldn't cost a click.
+          const open = i === 0;
           return (
-            <article class="xp" data-xp>
+            <article class={`xp${open ? ' is-open' : ''}`} data-xp>
               {/* the whole collapsed card is the trigger — one real button, so
                   Enter/Space and focus come for free */}
               <h3 class="xp__h">
@@ -34,7 +37,7 @@ const tabsFor = (job: (typeof jobs)[number]): TabId[] => {
                   class="xp__head"
                   type="button"
                   id={`xp-${i}-btn`}
-                  aria-expanded="false"
+                  aria-expanded={open ? 'true' : 'false'}
                   aria-controls={`xp-${i}-panel`}
                 >
                   <span class="xp__idx" aria-hidden="true">{pad(i + 1)} //</span>

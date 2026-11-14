@@ -10,6 +10,24 @@ const {
   title = 'Joseph K Anoj — Full Stack Developer · Frontend Specialist',
   description = 'Full Stack Developer and Frontend Specialist building fast, accessible, responsive interfaces in React and Astro. Open to remote work and relocation.',
 } = Astro.props;
+
+// Structured data for search engines — only facts already on the page.
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Joseph K Anoj',
+  url: 'https://josephk.dev/',
+  // The real photo, which is deliberately not shown anywhere on the page
+  // (the hero draws the particle portrait instead). Naming it here and in
+  // sitemap.xml is how search engines learn it is a picture of this person.
+  image: 'https://josephk.dev/images/Joseph-img.jpg',
+  jobTitle: 'Full Stack Developer',
+  description,
+  address: { '@type': 'PostalAddress', addressCountry: 'IN' },
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Sahrdaya College of Engineering and Technology' },
+  knowsAbout: ['React', 'Next.js', 'Astro', 'TypeScript', 'JavaScript', 'Node.js', 'Frontend engineering', 'Web accessibility'],
+  sameAs: ['https://github.com/JosuK22', 'https://linkedin.com/in/joseph-k-anoj'],
+};
 ---
 
 <!doctype html>
@@ -18,6 +36,9 @@ const {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="author" content="Joseph K Anoj" />
+    <meta name="theme-color" content="#0A0E0A" />
+    <meta name="color-scheme" content="dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href="https://josephk.dev/" />
 
@@ -33,6 +54,7 @@ const {
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Joseph K Anoj — Frontend Developer" />
     <meta property="og:site_name" content="Joseph K Anoj" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter/X -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -50,6 +72,8 @@ const {
 
     <title>{title}</title>
 
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(person)} />
+
     <!-- Boot-sequence flag. Runs before first paint so the intro never
          flashes; skipped entirely under prefers-reduced-motion, and a
          failsafe reveals the page even if the typing script never runs. -->
@@ -57,6 +81,9 @@ const {
       (function () {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         var root = document.documentElement;
+        // A link straight to a section (josephk.dev/#projects) should land
+        // there, not sit through the intro at the top of the page.
+        if (location.hash && location.hash !== '#top') return;
         root.classList.add('booting');
         setTimeout(function () {
           if (root.classList.contains('booting')) {
@@ -78,6 +105,12 @@ const {
       ╚══════════════════════════════════════════════════╝
     -->
     <a class="skip-link" href="#about">Skip to content</a>
+    <noscript>
+      <style>
+        /* the sfx switch and the shell both need JS — don't offer dead keys */
+        [data-sound-toggle], [data-term-open] { display: none !important; }
+      </style>
+    </noscript>
     <div class="scanlines" aria-hidden="true"></div>
     <slot />
 
@@ -100,7 +133,45 @@ const {
         audio.play().catch(() => {});
       }
 
-      const clickPool = createPool('/sounds/menu-click.mp3', 4, 0.5);
+      // ---- the sfx switch (nav) --------------------------------------
+      // On by default — the clicks are part of the machine — but one key
+      // turns them off, and the choice is remembered. <html data-sound>
+      // is the single source of truth; Contact.astro reads it too.
+      const SOUND_KEY = 'jk-sound';
+      const root = document.documentElement;
+      const toggles = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-sound-toggle]'));
+      const readSound = () => {
+        try {
+          return localStorage.getItem(SOUND_KEY) !== 'off';
+        } catch {
+          return true;
+        }
+      };
+      const applySound = (on: boolean) => {
+        root.dataset.sound = on ? 'on' : 'off';
+        toggles.forEach((t) => {
+          t.setAttribute('aria-pressed', String(on));
+          t.setAttribute('aria-label', on ? 'Interface sounds on — turn off' : 'Interface sounds off — turn on');
+          const state = t.querySelector('[data-sound-state]');
+          if (state) state.textContent = on ? 'on' : 'off';
+        });
+      };
+      applySound(readSound());
+      toggles.forEach((t) =>
+        t.addEventListener('click', () => {
+          const on = root.dataset.sound === 'off';
+          applySound(on);
+          try {
+            localStorage.setItem(SOUND_KEY, on ? 'on' : 'off');
+          } catch {
+            /* private mode: the switch still works for this visit */
+          }
+        })
+      );
+
+      // The pool is built on the first click that needs it, so a visitor
+      // with sound off never downloads the file at all.
+      let clickPool: HTMLAudioElement[] | null = null;
       const clickIndex = { i: 0 };
 
       document.addEventListener('click', (e) => {
@@ -108,6 +179,9 @@ const {
         if (!(target instanceof Element)) return;
         const match = target.closest(CLICKABLE_SELECTOR) as (HTMLElement & { disabled?: boolean }) | null;
         if (!match || match.disabled) return;
+        // Turning sound on confirms itself with a click; turning it off is silent.
+        if (root.dataset.sound === 'off') return;
+        clickPool ??= createPool('/sounds/menu-click.mp3', 4, 0.5);
         playFromPool(clickPool, clickIndex);
       });
     </script>

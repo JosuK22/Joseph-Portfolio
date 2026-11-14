@@ -190,6 +190,11 @@ export const projects: ProjectGroups = {
       stack: ['React Flow', 'Context API', 'localStorage'],
       overview:
         'Dynamic flowchart app built with React Flow, Context API, and persistent local storage for saving workflows.',
+      features: [
+        'Drag-and-drop nodes',
+        'Context API state management',
+        'Workflows persisted to local storage',
+      ],
       live: "https://josuk22.github.io/Work_Flow-Builder/",
       repo: "https://github.com/JosuK22/Work_Flow-Builder",
     },
@@ -246,18 +251,19 @@ export const projects: ProjectGroups = {
       repo: null,
     },
     {
-      file: 'wsf-globe.tsx',
+      file: 'world-startup-federation.astro',
       name: 'World Startup Federation',
-      tagline: 'Membership site with 3D globe',
+      // what it is, not its flashiest part — the globe is one feature below
+      tagline: 'Global startup community membership site',
       type: 'membership site',
-      tags: ['Astro', 'React Three Fiber', 'Three.js'],
+      tags: ['Astro', 'Three.js', 'REST APIs'],
       stack: ['Astro', 'React Three Fiber', 'Three.js', 'REST APIs'],
       overview:
         'Membership site for a global startup community, featuring a Three.js/react-three-fiber 3D globe hero, an interactive AI-persona chat feature, and a typed client consuming an in-house headless CMS API with retry/backoff.',
       features: [
-        'Three.js / react-three-fiber 3D globe hero',
-        'Interactive AI-persona chat feature',
         'Typed client consuming an in-house headless CMS API, with retry/backoff',
+        'Interactive AI-persona chat feature',
+        'Three.js / react-three-fiber 3D globe hero',
       ],
       live: null,
       repo: null,

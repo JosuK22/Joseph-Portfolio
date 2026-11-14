@@ -121,6 +121,11 @@ All colors live as CSS custom properties at the top of `src/styles/global.css`
 Bright green `--accent` is reserved for the name and section headers; amber `--link` is the
 only interactive color. Adjust there to retune the whole site.
 
+The palette is **three colours, and only three**: the black of the tube, phosphor green and
+amber. Everything else is a shade of one of them — errors and warnings use `--warn` (amber),
+and the window dots are amber / pale green / green rather than a traffic light. Don't add a
+fourth hue.
+
 ## Easter eggs
 
 Three games hide on the page, each behind its own trigger (see `src/scripts/secrets.ts`).
@@ -134,7 +139,12 @@ until something is found.
   canvas, and the easter eggs.
 - Everything animated respects `prefers-reduced-motion`, including the boot sequence, the
   scroll reveals, and the blinking cursor.
-- Nav collapses to a hamburger at 880px; the main layout breakpoint is ~720px.
+- Nav collapses to a hamburger at 1020px; the main layout breakpoint is ~720px.
+- UI click sounds are on by default; the nav's `sfx` key turns them off and the choice is
+  remembered (`localStorage` → `<html data-sound>`, wired in `Base.astro`).
+- A link with a section hash (`josephk.dev/#projects`) skips the boot intro and lands there.
+- The `about` section's readout and stat tiles only restate facts that live in `src/data/`
+  or the CV — keep them in step when those change.
 
 ## Deploy
 

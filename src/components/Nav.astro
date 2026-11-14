@@ -16,8 +16,20 @@ const links = [
     <div class="nav__links">
       {links.map((l) => <a class="nav__link" href={l.href}>{l.label}</a>)}
       <span class="nav__sep" aria-hidden="true">·</span>
-      <span class="nav__icons">
-        <a class="nav__icon" href="mailto:josephkanoj@gmail.com" aria-label="Email">✉</a>
+      <span class="nav__tools">
+        {/* The shell used to be reachable only from the footer or by knowing
+            ctrl+K. It is the site's best trick — it gets a key up here. */}
+        <button class="nav__tool" type="button" data-term-open aria-label="Open terminal (ctrl K)" title="Open terminal — ctrl K">
+          <span aria-hidden="true">&gt;_</span>
+        </button>
+        {/* UI sounds play on every click; this is the off switch. State and
+            label are kept in sync by the script in Base.astro. */}
+        <button class="nav__tool" type="button" data-sound-toggle aria-pressed="true" title="Toggle interface sounds">
+          sfx <span data-sound-state>on</span>
+        </button>
+        <a class="nav__tool nav__tool--solid" href="/resume.pdf" download="Joseph-K-Anoj-Frontend-Engineer-CV.pdf">
+          resume <span aria-hidden="true">↓</span>
+        </a>
       </span>
     </div>
 
@@ -30,7 +42,9 @@ const links = [
 
   <div class="nav__mobile shell" id="navMobile">
     {links.map((l) => <a href={l.href} data-close>{l.label}</a>)}
-    <a href="mailto:josephkanoj@gmail.com" data-close>email</a>
+    <a href="/resume.pdf" download="Joseph-K-Anoj-Frontend-Engineer-CV.pdf" data-close>resume ↓</a>
+    <button type="button" data-term-open data-close>&gt;_ open terminal</button>
+    <button type="button" data-sound-toggle aria-pressed="true">sfx: <span data-sound-state>on</span></button>
   </div>
 </header>
 
@@ -38,16 +52,24 @@ const links = [
   const toggle = document.getElementById('navToggle');
   const menu = document.getElementById('navMobile');
   if (toggle && menu) {
-    toggle.addEventListener('click', () => {
-      const open = menu.classList.toggle('open');
+    const setOpen = (open: boolean) => {
+      menu.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', String(open));
+    };
+    toggle.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+    menu.querySelectorAll('[data-close]').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    // Escape closes it and hands focus back to the button that opened it;
+    // a click anywhere else on the page closes it too.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !menu.classList.contains('open')) return;
+      setOpen(false);
+      toggle.focus();
     });
-    menu.querySelectorAll('[data-close]').forEach((a) =>
-      a.addEventListener('click', () => {
-        menu.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-      })
-    );
+    document.addEventListener('click', (e) => {
+      if (!menu.classList.contains('open') || !(e.target instanceof Node)) return;
+      if (menu.contains(e.target) || toggle.contains(e.target)) return;
+      setOpen(false);
+    });
   }
 
   // Scroll progress bar — a thin phosphor line under the nav that fills as
@@ -80,13 +102,21 @@ const links = [
   const sections = Array.from(byId.keys())
     .map((id) => document.getElementById(id))
     .filter((s): s is HTMLElement => s !== null);
+  const setActive = (id: string | null) => {
+    navLinks.forEach((l) => {
+      const on = l.hash.slice(1) === id;
+      l.classList.toggle('active', on);
+      if (on) l.setAttribute('aria-current', 'true');
+      else l.removeAttribute('aria-current');
+    });
+  };
   const spy = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        navLinks.forEach((l) => l.classList.remove('active'));
-        byId.get(entry.target.id)?.classList.add('active');
+        if (entry.isIntersecting) setActive(entry.target.id);
       }
+      // back in the hero, above every section: nothing is current
+      if (window.scrollY < 80) setActive(null);
     },
     // A narrow horizontal band around the reader's eyeline decides which
     // section is "current" — avoids two sections lighting up at once.

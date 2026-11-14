@@ -3,7 +3,7 @@
 // a terminal prompt resolving to the name.
 ---
 
-<section class="hero shell" id="top">
+<section class="hero shell" id="top" aria-label="Introduction">
   <div class="wrap hero__grid">
     <div class="hero__content">
       <p class="hero__boot">
@@ -11,28 +11,39 @@
         /home/joseph/portfolio ...<span class="ok"> ok</span>
       </p>
 
-      <p class="hero__prompt hero__stage" style="--stage: 0">~/joseph $ <span class="cmd-txt">who am i</span></p>
+      <p class="hero__prompt hero__stage" style="--stage: 0">~/joseph $ <span class="cmd-txt">whoami</span></p>
 
       <h1 class="hero__name hero__stage" style="--stage: 1">Joseph&nbsp;K&nbsp;Anoj</h1>
 
       <p class="hero__subtitle hero__stage" style="--stage: 2">Full Stack Developer · Frontend Specialist</p>
 
-      <!-- <p class="hero__tagline hero__stage" style="--stage: 3">
-        I build fast, accessible, responsive interfaces in React and Astro.<span class="cursor" aria-hidden="true"></span>
-      </p> -->
+      <p class="hero__tagline hero__stage" style="--stage: 3">
+        I build fast, accessible, responsive interfaces in React, Next.js and Astro — from Figma to
+        production.<span class="cursor cursor--sm" aria-hidden="true"></span>
+      </p>
 
       <p class="hero__meta hero__stage" style="--stage: 4">// based in India · open to remote &amp; relocation</p>
 
       <div class="hero__actions hero__stage" style="--stage: 5">
         <a class="btn btn--solid" href="#projects">View projects →</a>
-        <a class="btn btn--outline" href="/resume.pdf" download="Joseph-K-Anoj-Frontend-Engineer-CV.pdf">Download resume</a>
+        <a class="btn btn--outline" href="/resume.pdf" download="Joseph-K-Anoj-Frontend-Engineer-CV.pdf">Download resume ↓</a>
       </div>
+
+      <p class="hero__links hero__stage" style="--stage: 6">
+        <a href="https://github.com/JosuK22" target="_blank" rel="noopener">github <span class="arrow" aria-hidden="true">↗</span></a>
+        <a href="https://linkedin.com/in/joseph-k-anoj" target="_blank" rel="noopener">linkedin <span class="arrow" aria-hidden="true">↗</span></a>
+        <a href="#contact">get in touch <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
     </div>
 
-    <div class="hero__art hero__stage" style="--stage: 6" aria-hidden="true">
+    <div class="hero__art hero__stage" style="--stage: 7" aria-hidden="true">
       <canvas class="particles" id="heroParticles"></canvas>
     </div>
   </div>
+
+  <p class="hero__cue hero__stage" style="--stage: 9">
+    <a href="#about">// scroll <span class="arrow" aria-hidden="true">↓</span></a>
+  </p>
 </section>
 
 <script>

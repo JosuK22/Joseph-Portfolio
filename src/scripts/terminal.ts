@@ -30,7 +30,7 @@ const SECTIONS = ['about', 'skills', 'experience', 'projects', 'education', 'con
 const FILES: Record<string, string[]> = {
   'about.txt': [
     'Joseph K Anoj — full stack developer, frontend specialist.',
-    'Builds fast, accessible, responsive interfaces in React and Astro.',
+    'Builds fast, accessible, responsive interfaces in React, Next.js and Astro.',
     'Based in India · open to remote & relocation.',
   ],
   'contact.txt': [
@@ -626,6 +626,7 @@ export function initTerminal(): void {
     }
   });
 
-  // The footer prompt is the other door in — and the only one a phone has.
-  document.getElementById('termOpen')?.addEventListener('click', () => shell.open());
+  // The on-page doors in: the nav key and the footer prompt. On a phone,
+  // which has no ctrl+K, these are the only ones.
+  document.querySelectorAll('[data-term-open]').forEach((el) => el.addEventListener('click', () => shell.open()));
 }

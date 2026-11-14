@@ -52,7 +52,7 @@ export interface Job {
 export const jobs: Job[] = [
   {
     role: 'Frontend Developer',
-    company: 'Beyondz / Venture Way',
+    company: 'BeyondZ / Venture Way',
     dates: 'Jul 2025 – Present',
     location: 'Remote',
     status: 'current',

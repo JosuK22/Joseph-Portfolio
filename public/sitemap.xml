@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Single-page site: one URL, hand-maintained. If routes are ever added,
      swap this for the @astrojs/sitemap integration instead of editing it. -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://josephk.dev/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <!-- Not displayed on the page; listed so it can be indexed as a photo
+         of the person the page is about (see the JSON-LD in Base.astro). -->
+    <image:image>
+      <image:loc>https://josephk.dev/images/Joseph-img.jpg</image:loc>
+    </image:image>
   </url>
 </urlset>
